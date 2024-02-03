@@ -38,7 +38,11 @@ jobs:
       run: |
         cd ./testing
         for file in `ls`
+        exclude="__init__.py"
         do
-          echo "Starting execution of $file";
-          pytest -q $file;
+          if[ $file != $exclude ]
+          then
+            echo "Starting execution of $file";
+            pytest -q $file;
+          fi
         done

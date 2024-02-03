@@ -1,0 +1,6 @@
+{
+    "MODEL_PATH" : "bert-base-uncased",
+    "BATCH_SIZE" : 4,
+    "MAX_SEQUENCE_LENGTH" : 16,
+    "TOP_K" : 3
+}

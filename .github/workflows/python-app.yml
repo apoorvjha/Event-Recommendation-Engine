@@ -37,5 +37,6 @@ jobs:
     - name: Test with pytest
       run: |
         cd ./testing
+        python ../source/app.py
         exclude="__init__.py";
         for file in `ls`; do if [ $file != $exclude ]; then echo "Starting execution of $file"; pytest -q $file; fi; done

@@ -7,7 +7,7 @@ The repository contains [WIP] end-2-end code for the event recommendation engine
 
 
 TODO:
-    1. Modify the vector DB to be persistent.
+    1. Modify the vector DB to be persistent. -> Done
     2. Create following backend APIs:
         a. Auth Token issue / check
         b. User Signup

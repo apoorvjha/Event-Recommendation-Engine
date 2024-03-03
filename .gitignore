@@ -2,3 +2,4 @@ logs/*
 source/__pycache__
 testing/__pycache__
 testing/.pytest_cache
+data/*.db

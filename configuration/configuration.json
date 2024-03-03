@@ -2,5 +2,7 @@
     "MODEL_PATH" : "bert-base-uncased",
     "BATCH_SIZE" : 4,
     "MAX_SEQUENCE_LENGTH" : 16,
-    "TOP_K" : 3
+    "TOP_K" : 3,
+    "VECTOR_DB" : "../data/vector_db.db",
+    "VECTOR_STORE_TABLE_NAME" :  "VECTOR_EMBEDDING_STORE"
 }

@@ -5,7 +5,6 @@ from vector_database_builder import *
 import json
 
 app = Flask(__name__)
-vector_database = VectorDatabase()
 
 @app.route("/")
 def home():
@@ -17,11 +16,13 @@ def set_context_phrases():
         context_words = request.get_json()["context_phrases"]
         try:
             config = read_config()
+            vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
             embedding_matrix = get_embedding(config, context_words)
             vector_database.insert(
                 context_words,
                 embedding_matrix.cpu().numpy().tolist()
             )
+            vector_database.save_vector_db()
             return f"Context words has been inserted successfully into vector DB!", 200
         except Exception as e:
             return f"Failed to set context words into vector DB due to {e}", 400
@@ -34,6 +35,7 @@ def get_k_closest_phrases():
         query_words = request.get_json()["query_phrases"]
         try:
             config = read_config()
+            vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
             search_word_embedding = get_embedding(config, query_words)
             k = config["TOP_K"]
             response = {}
@@ -46,6 +48,7 @@ def get_k_closest_phrases():
             return f"Failed to set context words into vector DB due to {e}", 400
     else:
         return f"HTTP method {request.method} not allowed!", 404 
+
 
 if __name__ == '__main__':
     app.run(

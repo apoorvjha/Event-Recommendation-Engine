@@ -25,6 +25,7 @@ class VectorDatabase:
                     "Value", 
                     "Embedding"
                 )""")
+                self.con.commit()
                 return pd.DataFrame(data = data, columns = schema)
     def cosine_similarity(self, embedding1, embedding2):
         arr1 = np.array(embedding1).reshape(1, -1).astype(float)
@@ -56,8 +57,12 @@ class VectorDatabase:
         data_to_save = self.vector_db[~self.vector_db["Index"].isin(idx)]
         data_to_save["Embedding"] = data_to_save["Embedding"].astype(str)
         data_to_save.to_sql(name = self.table_name, con = self.con, if_exists = "append", index = False)
+        self.con.commit()
     def is_already_exists(self, value):
         return self.vector_db[self.vector_db["Value"] == value].shape[0] != 0
+    def destruct(self):
+        self.con.commit()
+        self.con.close()
 
 def test():
     vector_db = VectorDatabase()

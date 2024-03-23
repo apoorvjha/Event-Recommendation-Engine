@@ -89,7 +89,7 @@ def getUsers():
     config = read_config()
     db=DBOps(config)
     query="SELECT userID,profilePic,username,email,isActive FROM "+config['AUTH_TABLE_NAME']+" WHERE type='user'"
-    data=db.executeQuery(query)
+    data=db.executeQuery(query, val = ())
     db.destruct()
     return data
 

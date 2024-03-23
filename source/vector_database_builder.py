@@ -63,6 +63,11 @@ class VectorDatabase:
     def destruct(self):
         self.con.commit()
         self.con.close()
+    def get_word_indexes(self, words):
+        words = list(map(lambda x: x.lower(), words))
+        return self.vector_db[self.vector_db["Value"].isin(words)]["Index"].tolist()
+    def get_words(self, word_indexes):
+        return self.vector_db[self.vector_db["Index"].isin(word_indexes)]["Value"].tolist()
 
 def test():
     vector_db = VectorDatabase()

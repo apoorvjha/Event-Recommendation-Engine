@@ -6,5 +6,6 @@
     "VECTOR_DB" : "../data/vector_db.db",
     "VECTOR_STORE_TABLE_NAME" :  "VECTOR_EMBEDDING_STORE",
     "AUTH_DB_PATH" : "../data/auth_db.db",
-    "AUTH_TABLE_NAME" : "CREDENTIALS"
+    "AUTH_TABLE_NAME" : "CREDENTIALS",
+    "INTEREST_MAPPING_TABLE_NAME" : "INTEREST_MAPPING"
 }

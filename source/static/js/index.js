@@ -380,7 +380,7 @@ function set_task_param(){
 	if(code!=99){
 		if(code==1){
 			data="<center>";
-			data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUploadInfer()" action="inference"><table><tr><td><b>Image : </b></td><td><input type="file" id="inferPic" onChange="validateUploadInfer()" name="inferPic"></td></tr><tr><td><input type="submit" value="Infer" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="filecheck"></div></center>';	
+			data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUploadAdd()" action="addInterest"><table><tr><td><b>Enter comma seperated (,) one word adjectives that descrives who you are : </b></td><td><input type="text" id="interest_words" onChange="validateAndUploadAdd()" name="interest_words"></td></tr><tr><td><input type="submit" value="Add" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="interest_words_check"></div></center>';	
 		}
 		else if(code==2){
 			data="";
@@ -388,15 +388,11 @@ function set_task_param(){
   			data+='<strong>Fetching data...</strong>'
   			data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
 			data+='</div>'
-			getModelStats();
+			view_interests();
 		}
 		else if(code==3){
-			data="";
-			data+='<div class="d-flex align-items-center">';
-  			data+='<strong>Fetching data...</strong>'
-  			data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
-			data+='</div>'
-			getDataset();
+			data="<center>";
+			data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUploadDelete()" action="deleteInterest"><table><tr><td><b>Enter comma seperated (,) one word adjectives that you want to remove from your profile : </b></td><td><input type="text" id="interest_words" onChange="validateAndUploadDelete()" name="interest_words"></td></tr><tr><td><input type="submit" value="Delete" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="interest_words_check"></div></center>';
 		}
 		else{
 			data="Invalid selection code!";
@@ -409,8 +405,8 @@ function set_task_param(){
 }
 
 
-function getDataset(){
-	fetch('/getDataset')
+function view_interests(){
+	fetch('/viewInterest')
 	.then((res)=>{
 		return res.json()
 	})
@@ -418,21 +414,16 @@ function getDataset(){
 		(response)=>{
 			if(response.status==200){
 				let data="";
-				data+="<b>Dataset fetched successfully!</b><br>";
+				data+="<b>Interests fetched successfully!</b><br>";
 				data+='<table class="user-data-div">';
-				data+='<tr><th>Class Name</th><th>Data</th></tr>';
-				response.images.map((dataset)=>{
+				data+='<tr><th>Index</th><th>Word</th></tr>';
+				
+				for(i = 0; i< response.words.lenth; i = i+1){
 					data+='<tr>';
-					data+='<td>'+ dataset.name +'</td>';
-					data+='<td><img src="'+ dataset.image +'" class="dataset-image"></td>';
+					data+='<td>'+ response.indexes[i] +'</td>';
+					data+='<td>'+ response.words[i] +'</td>';
 					data+='</tr>';
-				});
-				response.videos.map((dataset)=>{
-					data+='<tr>';
-					data+='<td>'+ dataset.name +'</td>';
-					data+='<td><video class="dataset-video" controls><source src="'+ dataset.video +'" type="video/mp4"> Your Browser does not support video media! </video></td>';
-					data+='</tr>';
-				});
+				}
 				data+="</table>";
 				document.getElementById("task").innerHTML=data;
 			}
@@ -440,72 +431,114 @@ function getDataset(){
 	);
 }
 
-function getModelStats(){
-	fetch('/getModelStats')
-	.then((res)=>{
-		return res.json()
-	})
-	.then(
-		(response)=>{
-			if(response.status==200){
-				let data="";
-				data+="<b>Model statistics fetched successfully!</b><br>";
-				data+='<table class="user-data-div">';
-				data+='<tr><th>Parameter</th><th>Value</th></tr>';
-				response.params.map((param)=>{
-					data+='<tr>';
-					data+='<td>'+ param.name +'</td>';
-					data+='<td>'+ param.value +'</td>';
-					data+='</tr>';
-				});
-				data+="</table>";
-				document.getElementById("task").innerHTML=data;
-			}
-		}
-	);
-}
-
-function validateUploadInfer(){
-	var fInput = document.getElementById("inferPic")
-	var flag = 0
-	if(fInput.value.length!=0){
+function validateAndUploadAdd(){
+	var fInput = document.getElementById("interest_words")
+	var strings = fInput.value.split(',').map(s => s.trim());
+	var flag = 1
+	if(strings.length!=0){
 		/* file validation */
-		var validExt= /(\.jpg|\.jpeg|\.png|\.gif)$/i;
-		if (!validExt.exec(fInput.value)) {
-			document.getElementById("filecheck").innerHTML='<font color="red">Only JPEG, JPG, PNG and GIF formats are supported!</font>';
-			fInput.style.borderColor="red";
-			flag=0;
-		}
-		else{
-			document.getElementById("filecheck").innerHTML='<font color="green">Looks good!</font>';
-			flag=1;
-			fInput.style.borderColor="green";
+		for(let i=0; i<strings.length; i = i + 1){
+			if(strings[i].includes(' ')){
+				document.getElementById("interest_words_check").innerHTML='<font color="red">Only one word adjectives are supported!</font>';
+				fInput.style.borderColor="red";
+				flag=0;	
+			}
 		} 
 	}
 	if(flag==0){
 		return false;
 	}
 	else{
+
+		document.getElementById("interest_words_check").innerHTML='<font color="green">Looks good!</font>';
+		fInput.style.borderColor="green";
+		
+		
 		let formData=new FormData();
-		formData.append('file',fInput.files[0]);
+		// formData.append('interest_words',strings);
 		let requestOptions = {
 			method: 'POST',
-			body: formData,
-			redirect: 'follow'
+			body: JSON.stringify(strings),
+			redirect: 'follow',
+			headers: {
+				'Content-Type': 'application/json'
+			}
 	  };	
 		let data="";
 		data+='<div class="d-flex align-items-center">';
-		data+='<strong>Making inference...</strong>'
+		data+='<strong>Adding Interests...</strong>'
 		data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
 		data+='</div>'
 		document.getElementById("task").innerHTML=data;
-	fetch("/inference", requestOptions)
+	fetch("/addInterest", requestOptions)
 	.then(response => response.json())
 	.then((result) => {
 		if(result.status==200){
-			data='Response time = '+result.response_time +' Seconds.<br>';
-			data+='<img src="'+ result.image +'" class="result_img">'
-			data+='&nbsp;&nbsp;&nbsp;&nbsp;The supplied image belongs to <u><b>'+result.prediction + '</b></u> class!<br>';
+			data='';
+			data+='<div class="d-flex align-items-center">';
+			data+='<strong>Interests Added Sucessfully!</strong>'
+			data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+			data+='</div>'
+			document.getElementById("task").innerHTML=data;
+		}
+		else{
+			alert("Server error! Try again later.");
+		}
+	})
+	.catch(error => console.log('error', error));
+
+	}
+
+}
+
+function validateAndUploadDelete(){
+	var fInput = document.getElementById("interest_words")
+	var strings = fInput.value.split(',').map(s => s.trim());
+	var flag = 1
+	if(strings.length!=0){
+		/* file validation */
+		for(let i=0; i<strings.length; i = i + 1){
+			if(strings[i].includes(' ')){
+				document.getElementById("interest_words_check").innerHTML='<font color="red">Only one word adjectives are supported!</font>';
+				fInput.style.borderColor="red";
+				flag=0;	
+			}
+		} 
+	}
+	if(flag==0){
+		return false;
+	}
+	else{
+
+		document.getElementById("interest_words_check").innerHTML='<font color="green">Looks good!</font>';
+		fInput.style.borderColor="green";
+		
+		
+		let formData=new FormData();
+		// formData.append('interest_words',strings);
+		let requestOptions = {
+			method: 'POST',
+			body: JSON.stringify(strings),
+			redirect: 'follow',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+	  };	
+		let data="";
+		data+='<div class="d-flex align-items-center">';
+		data+='<strong>Deleting Interests...</strong>'
+		data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+		data+='</div>'
+		document.getElementById("task").innerHTML=data;
+	fetch("/deleteInterest", requestOptions)
+	.then(response => response.json())
+	.then((result) => {
+		if(result.status==200){
+			data='';
+			data+='<div class="d-flex align-items-center">';
+			data+='<strong>Interests Deleted Sucessfully!</strong>'
+			data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+			data+='</div>'
 			document.getElementById("task").innerHTML=data;
 		}
 		else{

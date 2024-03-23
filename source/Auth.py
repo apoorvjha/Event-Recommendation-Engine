@@ -5,6 +5,7 @@ class DBOps:
     def __init__(self, config):
         self.con = sqlite3.connect(config["AUTH_DB_PATH"])
         self.table_name = config["AUTH_TABLE_NAME"]
+        self.interest_mapping_table_name = config["INTEREST_MAPPING_TABLE_NAME"]
         cur = self.con.cursor()
         cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.table_name}(
             "username" TEXT,
@@ -14,6 +15,11 @@ class DBOps:
             "email" TEXT,
             "userID" INTEGER PRIMARY KEY AUTOINCREMENT,
             "isActive" INTEGER
+        )""")
+        self.con.commit()
+        cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.interest_mapping_table_name}(
+            "userID" INTEGER,
+            "WordIndex" TEXT
         )""")
         self.con.commit()
     def executeQuery(self, query, val, return_mode = True):
@@ -135,5 +141,33 @@ def changeEmail(id,newEmail):
     query="UPDATE "+config['AUTH_TABLE_NAME']+" SET email=? WHERE userID=?"
     val=(newEmail,id)
     data=db.executeQuery(query,val, return_mode=False)
+    db.destruct()
+    return
+
+def save_word_index_mapping(word_indexes, userId):
+    config = read_config()
+    db=DBOps(config)
+    query="INSERT INTO "+config['INTEREST_MAPPING_TABLE_NAME']+" (userID, WordIndex) VALUES (?, ?)"
+    check_query = "SELECT COUNT(*) FROM "+config['INTEREST_MAPPING_TABLE_NAME']+" WHERE userID = ? AND WordIndex = ?"
+    for word_index in word_indexes:
+        val=(userId, word_index)
+        count = db.executeQuery(check_query, val)
+        if count[0][0] != 0:
+            continue
+        db.executeQuery(query, val)
+    db.destruct()
+    return
+
+def delete_word_index_mapping(word_indexes, userId):
+    config = read_config()
+    db=DBOps(config)
+    query="DELETE FROM "+config['INTEREST_MAPPING_TABLE_NAME']+" WHERE userID = ? AND WordIndex = ?"
+    check_query = "SELECT COUNT(*) FROM "+config['INTEREST_MAPPING_TABLE_NAME']+" WHERE userID = ? AND WordIndex = ?"
+    for word_index in word_indexes:
+        val=(userId, word_index)
+        count = db.executeQuery(check_query, val)
+        if count[0][0] != 0:
+            continue
+        db.executeQuery(query, val)
     db.destruct()
     return

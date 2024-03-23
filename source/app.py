@@ -148,7 +148,66 @@ def changeProfPic():
             return {"status" : 404}
     else:
         return {"status" : 500}
+@app.route('/addInterest', methods = ['POST'])
+def addInterest():
+    if session['userId']:
+        if request.method=='POST':
+            context_words = request.get_json()
+            print(context_words)
+            try:
+                config = read_config()
+                vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+                embedding_matrix = get_embedding(config, context_words)
+                vector_database.insert(
+                    context_words,
+                    embedding_matrix.cpu().numpy().tolist()
+                )
+                vector_database.save_vector_db()
+                word_indexes = vector_database.get_word_indexes(context_words)
+                vector_database.destruct()
+                Auth.save_word_index_mapping(word_indexes, session['userId'])
+                flash("Interest words saved successfully!","alert alert-success")
+                return redirect(url_for('index'))
+            except Exception as e:
+                print(e)
+                return {"status" : 500}
+        else:
+            return {"status" : 404}
 
+@app.route('/deleteInterest', methods = ['POST'])
+def deleteInterest():
+    if session['userId']:
+        if request.method=='POST':
+            context_words = request.get_json()
+            print(context_words)
+            try:
+                config = read_config()
+                vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+                word_indexes = vector_database.get_word_indexes(context_words)
+                vector_database.destruct()
+                Auth.delete_word_index_mapping(word_indexes, session['userId'])
+                flash("Interest words deleted successfully!","alert alert-success")
+                return redirect(url_for('index'))
+            except Exception as e:
+                return {"status" : 500}
+    else:
+        return {"status" : 404}
+
+@app.route('/viewInterest', methods = ['POST'])
+def viewInterest():
+    if session['userId']:
+        if request.method=='POST':
+            try:
+                config = read_config()
+                word_indexes = Auth.get_word_index_mapping(session['userId'])
+                vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+                words = vector_database.get_words(word_indexes)
+                vector_database.destruct()
+                return {"status" : 200, "words" : words, "indexes" : word_indexes}
+            except Exception as e:
+                return {"status" : 500}
+    else:
+        return {"status" : 404}
 
 @app.route("/api/v1/set_context_phrases", methods = ["POST"])
 def set_context_phrases():

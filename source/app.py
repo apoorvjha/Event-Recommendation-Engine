@@ -1,10 +1,17 @@
-from flask import Flask, request
+from flask import Flask, render_template, redirect, flash, request, url_for, session
+from werkzeug.utils import secure_filename
+import Auth
+import time
+import os
+from os import listdir
 from embedding_model import *
 from utility import *
 from vector_database_builder import *
 import json
 
 app = Flask(__name__)
+
+app.secret_key="EVENT_MANAGEMENT_AI_2024-03-23"
 
 @app.route('/')
 def index():
@@ -58,8 +65,8 @@ def registerBack():
         email=request.form['email']
         profilePic=request.files['profilePic']
         fileName=userId + secure_filename(profilePic.filename)
-        profilePic.save('../data/static/PROFILE_PIC/'+fileName)
-        profilePath='../data/static/PROFILE_PIC/'+fileName
+        profilePic.save('./static/PROFILE_PIC/'+fileName)
+        profilePath='./static/PROFILE_PIC/'+fileName
         status=Auth.register(userId,password,email,profilePath)
         if status==True:
             # as we advance, incorporate functionality of OTP verification as well.

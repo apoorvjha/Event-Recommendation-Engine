@@ -31,7 +31,7 @@ class DBOps:
         self.con.commit()
         self.con.close()
 
-def check"+config['AUTH_TABLE_NAME']+"(userId,password):
+def checkCredentials(userId,password):
     config = read_config()
     db=DBOps(config)
     query="SELECT count(*) FROM "+config['AUTH_TABLE_NAME']+" WHERE username=? AND password=?"

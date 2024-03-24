@@ -153,7 +153,6 @@ def addInterest():
     if session['userId']:
         if request.method=='POST':
             context_words = request.get_json()
-            print(context_words)
             try:
                 config = read_config()
                 vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
@@ -169,7 +168,6 @@ def addInterest():
                 flash("Interest words saved successfully!","alert alert-success")
                 return redirect(url_for('index'))
             except Exception as e:
-                print(e)
                 return {"status" : 500}
         else:
             return {"status" : 404}
@@ -179,7 +177,7 @@ def deleteInterest():
     if session['userId']:
         if request.method=='POST':
             context_words = request.get_json()
-            print(context_words)
+            # print(context_words)
             try:
                 config = read_config()
                 vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
@@ -189,14 +187,15 @@ def deleteInterest():
                 flash("Interest words deleted successfully!","alert alert-success")
                 return redirect(url_for('index'))
             except Exception as e:
+                # print(e)
                 return {"status" : 500}
     else:
         return {"status" : 404}
 
-@app.route('/viewInterest', methods = ['POST'])
+@app.route('/viewInterest', methods = ['GET'])
 def viewInterest():
     if session['userId']:
-        if request.method=='POST':
+        if request.method=='GET':
             try:
                 config = read_config()
                 word_indexes = Auth.get_word_index_mapping(session['userId'])
@@ -205,6 +204,7 @@ def viewInterest():
                 vector_database.destruct()
                 return {"status" : 200, "words" : words, "indexes" : word_indexes}
             except Exception as e:
+                # print(e)
                 return {"status" : 500}
     else:
         return {"status" : 404}
@@ -245,7 +245,7 @@ def get_k_closest_phrases():
             vector_database.destruct()
             return json.dumps(response), 200
         except Exception as e:
-            print(e)
+            # print(e)
             return f"Failed to set context words into vector DB due to {e}", 400
     else:
         return f"HTTP method {request.method} not allowed!", 404 

@@ -412,13 +412,14 @@ function view_interests(){
 	})
 	.then(
 		(response)=>{
+			// console.log(response)
 			if(response.status==200){
 				let data="";
 				data+="<b>Interests fetched successfully!</b><br>";
 				data+='<table class="user-data-div">';
 				data+='<tr><th>Index</th><th>Word</th></tr>';
 				
-				for(i = 0; i< response.words.lenth; i = i+1){
+				for(i = 0; i< response.words.length; i = i+1){
 					data+='<tr>';
 					data+='<td>'+ response.indexes[i] +'</td>';
 					data+='<td>'+ response.words[i] +'</td>';
@@ -434,22 +435,25 @@ function view_interests(){
 function validateAndUploadAdd(){
 	var fInput = document.getElementById("interest_words")
 	var strings = fInput.value.split(',').map(s => s.trim());
+	// console.log(strings);
 	var flag = 1
 	if(strings.length!=0){
 		/* file validation */
 		for(let i=0; i<strings.length; i = i + 1){
 			if(strings[i].includes(' ')){
+				// console.log("Issue");
 				document.getElementById("interest_words_check").innerHTML='<font color="red">Only one word adjectives are supported!</font>';
 				fInput.style.borderColor="red";
 				flag=0;	
 			}
 		} 
 	}
+	// console.log(flag);
 	if(flag==0){
 		return false;
 	}
 	else{
-
+		// console.log("Check Pass!");
 		document.getElementById("interest_words_check").innerHTML='<font color="green">Looks good!</font>';
 		fInput.style.borderColor="green";
 		
@@ -471,45 +475,56 @@ function validateAndUploadAdd(){
 		data+='</div>'
 		document.getElementById("task").innerHTML=data;
 	fetch("/addInterest", requestOptions)
-	.then(response => response.json())
-	.then((result) => {
-		if(result.status==200){
-			data='';
-			data+='<div class="d-flex align-items-center">';
-			data+='<strong>Interests Added Sucessfully!</strong>'
-			data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
-			data+='</div>'
-			document.getElementById("task").innerHTML=data;
-		}
-		else{
-			alert("Server error! Try again later.");
-		}
+	.then(response => {
+		data='';
+		data+='<div class="d-flex align-items-center">';
+		data+='<strong>Interests Added Sucessfully!</strong>'
+		data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+		data+='</div>'
+		document.getElementById("task").innerHTML=data;
 	})
-	.catch(error => console.log('error', error));
+	// .then((result) => {
+	// 	console.log(result);
+	// 	if(result.status==200){
+	// 		data='';
+	// 		data+='<div class="d-flex align-items-center">';
+	// 		data+='<strong>Interests Added Sucessfully!</strong>'
+	// 		data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+	// 		data+='</div>'
+	// 		document.getElementById("task").innerHTML=data;
+	// 	}
+	// 	else{
+	// 		alert("Server error! Try again later.");
+	// 	}
+	// })
+	// .catch(error => console.log('error', error));
 
 	}
 
 }
 
 function validateAndUploadDelete(){
-	var fInput = document.getElementById("interest_words")
+	var fInput = document.getElementById("interest_words");
 	var strings = fInput.value.split(',').map(s => s.trim());
-	var flag = 1
+	console.log(strings);
+	var flag = 1;
 	if(strings.length!=0){
 		/* file validation */
 		for(let i=0; i<strings.length; i = i + 1){
 			if(strings[i].includes(' ')){
+				console.log("Issue");
 				document.getElementById("interest_words_check").innerHTML='<font color="red">Only one word adjectives are supported!</font>';
 				fInput.style.borderColor="red";
 				flag=0;	
 			}
 		} 
 	}
+	console.log(flag);
 	if(flag==0){
 		return false;
 	}
 	else{
-
+		console.log("Check Pass!");
 		document.getElementById("interest_words_check").innerHTML='<font color="green">Looks good!</font>';
 		fInput.style.borderColor="green";
 		
@@ -531,21 +546,28 @@ function validateAndUploadDelete(){
 		data+='</div>'
 		document.getElementById("task").innerHTML=data;
 	fetch("/deleteInterest", requestOptions)
-	.then(response => response.json())
-	.then((result) => {
-		if(result.status==200){
-			data='';
-			data+='<div class="d-flex align-items-center">';
-			data+='<strong>Interests Deleted Sucessfully!</strong>'
-			data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
-			data+='</div>'
-			document.getElementById("task").innerHTML=data;
-		}
-		else{
-			alert("Server error! Try again later.");
-		}
+	.then(response => {
+		data='';
+		data+='<div class="d-flex align-items-center">';
+		data+='<strong>Interests Deleted Sucessfully!</strong>'
+		data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+		data+='</div>'
+		document.getElementById("task").innerHTML=data;
 	})
-	.catch(error => console.log('error', error));
+	// .then((result) => {
+	// 	if(result.status==200){
+			// data='';
+			// data+='<div class="d-flex align-items-center">';
+			// data+='<strong>Interests Deleted Sucessfully!</strong>'
+			// data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+			// data+='</div>'
+			// document.getElementById("task").innerHTML=data;
+	// 	}
+	// 	else{
+	// 		alert("Server error! Try again later.");
+	// 	}
+	// })
+	// .catch(error => console.log('error', error));
 
 	}
 

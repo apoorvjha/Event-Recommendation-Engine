@@ -154,7 +154,7 @@ def save_word_index_mapping(word_indexes, userId):
         count = db.executeQuery(check_query, val)
         if count[0][0] != 0:
             continue
-        db.executeQuery(query, val)
+        db.executeQuery(query, val, return_mode = False)
     db.destruct()
     return
 
@@ -166,8 +166,19 @@ def delete_word_index_mapping(word_indexes, userId):
     for word_index in word_indexes:
         val=(userId, word_index)
         count = db.executeQuery(check_query, val)
-        if count[0][0] != 0:
+        if count[0][0] == 0:
             continue
-        db.executeQuery(query, val)
+        db.executeQuery(query, val, return_mode = False)
     db.destruct()
     return
+
+def get_word_index_mapping(userId):
+    config = read_config()
+    db=DBOps(config)
+    query="SELECT WordIndex FROM "+config['INTEREST_MAPPING_TABLE_NAME']+" WHERE userID = ? "
+    val=(userId,)
+    data = db.executeQuery(query, val, return_mode = True)
+    result = []
+    for d in data:
+        result.append(d[0])
+    return result

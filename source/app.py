@@ -148,6 +148,7 @@ def changeProfPic():
             return {"status" : 404}
     else:
         return {"status" : 500}
+
 @app.route('/addInterest', methods = ['POST'])
 def addInterest():
     if session['userId']:
@@ -168,6 +169,40 @@ def addInterest():
                 flash("Interest words saved successfully!","alert alert-success")
                 return redirect(url_for('index'))
             except Exception as e:
+                return {"status" : 500}
+        else:
+            return {"status" : 404}
+
+@app.route('/addEvent', methods = ['POST'])
+def addEvent():
+    if session['type']=='admin':
+        if request.method=='POST':
+            data = request.get_json()
+
+            context_words = data["context_words"]
+            event_name = data["event_name"]
+            event_description = data["event_description"]
+            event_date = data["event_date"]
+            event_address = data["event_address"]
+
+            print(context_words, event_name, event_description, event_date, event_address)
+
+            try:
+                config = read_config()
+                vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+                embedding_matrix = get_embedding(config, context_words)
+                vector_database.insert(
+                    context_words,
+                    embedding_matrix.cpu().numpy().tolist()
+                )
+                vector_database.save_vector_db()
+                word_indexes = vector_database.get_word_indexes(context_words)
+                vector_database.destruct()
+                Auth.save_event(word_indexes, event_name, event_description, event_date, event_address)
+                flash("Event created successfully!","alert alert-success")
+                return redirect(url_for('index'))
+            except Exception as e:
+                print(f"Add Event Exception ==> {e}")
                 return {"status" : 500}
         else:
             return {"status" : 404}

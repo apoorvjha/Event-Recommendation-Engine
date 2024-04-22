@@ -8,14 +8,19 @@ The repository contains [WIP] end-2-end code for the event recommendation engine
 
 TODO:
     1. Modify the vector DB to be persistent. -> Done
-    2. Create following backend APIs:
-        a. Auth Token issue / check
-        b. User Signup
-        c. Event Induction
-        d. Event Invitation
-        e. Event Aceeptance
-        f. Event Deletion
-        g. Event Recommendation
-        h. Password Change
-        i. Logout
-    3. Create the frontend screens.
+    2. Create following backend APIs: -> In Progress
+        a. Auth Token issue / check -> Done
+        b. User Signup -> Done
+        c. Event Induction -> Done
+        d. Event Invitation -> TBU
+        e. Event Aceeptance -> TBU
+        f. Event Deletion -> TBU
+        g. Event Recommendation -> TBU
+        h. Password Change -> Done
+        i. Logout -> Done
+        j. Add Interest -> Done
+        k. Delete Interest -> Done
+        l. View Interest -> Done
+        m. Change Profile Pic -> Done
+        n. Change Password -> Done
+    3. Create the frontend screens -> In-Progress

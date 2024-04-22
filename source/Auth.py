@@ -1,11 +1,15 @@
 import sqlite3
 from utility import *
+from datetime import datetime, timedelta
+import hashlib
+import numpy as np
 
 class DBOps:
     def __init__(self, config):
         self.con = sqlite3.connect(config["AUTH_DB_PATH"])
         self.table_name = config["AUTH_TABLE_NAME"]
         self.interest_mapping_table_name = config["INTEREST_MAPPING_TABLE_NAME"]
+        self.event_table_name = config["EVENT_TABLE_NAME"]
         cur = self.con.cursor()
         cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.table_name}(
             "username" TEXT,
@@ -20,6 +24,15 @@ class DBOps:
         cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.interest_mapping_table_name}(
             "userID" INTEGER,
             "WordIndex" TEXT
+        )""")
+        self.con.commit()
+        cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.event_table_name}(
+            "eventID" TEXT,
+            "WordIndex" TEXT,
+            "eventName" TEXT,
+            "eventDescription" TEXT,
+            "eventDate" TIMESTAMP,
+            "eventAddress" TEXT
         )""")
         self.con.commit()
     def executeQuery(self, query, val, return_mode = True):
@@ -182,3 +195,23 @@ def get_word_index_mapping(userId):
     for d in data:
         result.append(d[0])
     return result
+
+def create_index():
+    date_component = datetime.now() + timedelta(days = np.random.randint(-100, 100))
+    return hashlib.md5(date_component.strftime("%Y-%m-%d").encode()).hexdigest()[ : 16]
+
+def save_event(word_indexes, event_name, event_description, event_date, event_address):
+    config = read_config()
+    db=DBOps(config)
+    event_id = create_index()
+    query="INSERT INTO "+config['EVENT_TABLE_NAME']+" (eventID, WordIndex, eventName, eventDescription, eventDate, eventAddress) VALUES (?, ?, ?, ?, ?, ?)"
+    check_query = "SELECT COUNT(*) FROM "+config['EVENT_TABLE_NAME']+" WHERE eventName = ? AND WordIndex = ?"
+    for word_index in word_indexes:
+        val=(event_name, word_index)
+        count = db.executeQuery(check_query, val)
+        if count[0][0] != 0:
+            continue
+        val1 = (event_id, word_index, event_name, event_description, event_date, event_address)
+        db.executeQuery(query, val1, return_mode = False)
+    db.destruct()
+    return

@@ -394,6 +394,20 @@ function set_task_param(){
 			data="<center>";
 			data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUploadDelete()" action="deleteInterest"><table><tr><td><b>Enter comma seperated (,) one word adjectives that you want to remove from your profile : </b></td><td><input type="text" id="interest_words" onChange="validateAndUploadDelete()" name="interest_words"></td></tr><tr><td><input type="submit" value="Delete" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="interest_words_check"></div></center>';
 		}
+		else if(code==4){
+			data="<center>";
+			// data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUpload()" action="changeProfilePicture"><table><tr><td><b>New Profile Picture</b></td><td><input type="file" id="profpic" name="profpic" onChange="validateUpload()" name="profpic"></td></tr><tr><td><input type="submit" value="Change" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="filecheck"></div></center>';
+			data += "<h1>WIP</h1>"
+		}
+		else if(code==5){
+			data="<center>";
+			data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUploadAddEvent()"><table><tr><td><b>Event Name</b></td><td><input type="text" id="event_name" name="event_name" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Description</b></td><td><input type="text" id="event_description" name="event_description" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Date</b></td><td><input type="datetime-local" id="event_date" name="event_date" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Location</b></td><td><input type="text" id="event_address" name="event_address" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Tags (comma seperated (,) one word adjectives that describes event)</b></td><td><input type="text" id="event_tag" name="event_tag" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><input type="submit" value="Change" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="event_check"></div></center>';
+		}
+		else if(code==6){
+			data="<center>";
+			//  data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUpload()" action="changeProfilePicture"><table><tr><td><b>New Profile Picture</b></td><td><input type="file" id="profpic" name="profpic" onChange="validateUpload()" name="profpic"></td></tr><tr><td><input type="submit" value="Change" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="filecheck"></div></center>';
+			data += "<h1>WIP</h1>"
+		}
 		else{
 			data="Invalid selection code!";
 		}
@@ -430,6 +444,109 @@ function view_interests(){
 			}
 		}
 	);
+}
+
+
+function validateAndUploadAddEvent(){
+	var event_name = document.getElementById("event_name")
+	var event_description = document.getElementById("event_description")
+	var event_date = document.getElementById("event_date")
+	var event_address = document.getElementById("event_address")
+	var fInput = document.getElementById("event_tag")
+	var strings = fInput.value.split(',').map(s => s.trim());
+	console.log(event_name.value + event_description.value + event_address.value + event_date.value + strings);
+	var flag = 1
+
+	if(strings.length!=0){
+		/* file validation */
+		for(let i=0; i<strings.length; i = i + 1){
+			if(strings[i].includes(' ')){
+				// console.log("Issue");
+				document.getElementById("event_check").innerHTML='<font color="red">Only one word adjectives are supported!</font>';
+				fInput.style.borderColor="red";
+				flag=0;	
+			}
+			if(strings[i].length == 0){
+				flag = 0
+			}
+		} 
+	}
+	else{
+		document.getElementById("event_check").innerHTML='<font color="red">No tags found!</font>';
+		fInput.style.borderColor="red";
+		flag = 0
+	}
+
+	if (event_name.value.length == 0){
+		document.getElementById("event_check").innerHTML='<font color="red">Event name cannot be empty!</font>';
+		event_name.style.borderColor="red";
+		flag = 0
+	}
+	if (event_description.value.length == 0){
+		document.getElementById("event_check").innerHTML='<font color="red">Event description cannot be empty!</font>';
+		event_description.style.borderColor="red";
+		flag = 0
+	}
+	if (event_date.value.length == 0){
+		document.getElementById("event_check").innerHTML='<font color="red">Event date cannot be empty!</font>';
+		event_date.style.borderColor="red";
+		flag = 0
+	}
+	if (event_address.value.length == 0){
+		document.getElementById("event_check").innerHTML='<font color="red">Event address cannot be empty!</font>';
+		event_address.style.borderColor="red";
+		flag = 0
+	} 
+
+
+	// console.log(flag);
+	if(flag==0){
+		return false;
+	}
+	else{
+		// console.log("Check Pass!");
+		document.getElementById("event_check").innerHTML='<font color="green">Looks good!</font>';
+		fInput.style.borderColor="green";
+		event_name.style.borderColor="green";
+		event_description.style.borderColor="green";
+		event_date.style.borderColor="green";
+		event_address.style.borderColor="green";
+		
+		
+		let formData=new FormData();
+		// formData.append('interest_words',strings);
+		let requestOptions = {
+			method: 'POST',
+			body: JSON.stringify(
+				{
+					"context_words" : strings,
+					"event_name" : event_name.value,
+					"event_description" : event_description.value,
+					"event_date" : event_date.value,
+					"event_address" : event_address.value 
+				}
+			),
+			redirect: 'follow',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+	  };	
+		let data="";
+		data+='<div class="d-flex align-items-center">';
+		data+='<strong>Adding Event...</strong>'
+		data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+		data+='</div>'
+		document.getElementById("task").innerHTML=data;
+	fetch("/addEvent", requestOptions)
+	.then(response => {
+		data='';
+		data+='<div class="d-flex align-items-center">';
+		data+='<strong>Event Added Sucessfully!</strong>'
+		data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+		data+='</div>'
+		document.getElementById("task").innerHTML=data;
+	})
+	}
 }
 
 function validateAndUploadAdd(){

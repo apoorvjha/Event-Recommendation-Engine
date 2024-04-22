@@ -8,6 +8,11 @@
             <option value="1">Add Interests</option>
             <option value="2">View Interests</option>
             <option value=3>Delete Interest</option>
+            <option value=4>View Recommended Events</option>
+            {% if session['type']=='admin' %}
+                <option value=5>Add Event</option>
+                <option value=6>View All Events</option>
+            {% endif %}
         </select>
     </div>
 </center>

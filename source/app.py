@@ -227,6 +227,31 @@ def deleteInterest():
     else:
         return {"status" : 404}
 
+@app.route('/viewEvents', methods = ['GET'])
+def viewEvents():
+    if session['type']=='admin':
+        if request.method=='GET':
+            try:
+                config = read_config()
+                data = Auth.get_events()
+                word_indexes = data["event_tags"]
+                vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+                event_tags = []
+                for wi in word_indexes:
+                    if isinstance(wi, list): 
+                        event_tags.append(vector_database.get_words(wi))
+                    else:
+                        event_tags.append(vector_database.get_words([wi]))
+                data["event_tags"] = event_tags
+                vector_database.destruct()
+                data["status"] = 200
+                return data
+            except Exception as e:
+                print(e)
+                return {"status" : 500}
+    else:
+        return {"status" : 404}
+
 @app.route('/viewInterest', methods = ['GET'])
 def viewInterest():
     if session['userId']:
@@ -239,7 +264,7 @@ def viewInterest():
                 vector_database.destruct()
                 return {"status" : 200, "words" : words, "indexes" : word_indexes}
             except Exception as e:
-                # print(e)
+                print(e)
                 return {"status" : 500}
     else:
         return {"status" : 404}

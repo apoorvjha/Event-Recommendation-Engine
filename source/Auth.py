@@ -215,3 +215,38 @@ def save_event(word_indexes, event_name, event_description, event_date, event_ad
         db.executeQuery(query, val1, return_mode = False)
     db.destruct()
     return
+
+def get_events():
+    config = read_config()
+    db=DBOps(config)
+    query = f"""
+        SELECT
+            eventName,
+            eventDescription,
+            eventDate,
+            eventAddress,
+            GROUP_CONCAT(WordIndex) as WordIndex 
+        FROM 
+            {config['EVENT_TABLE_NAME']}
+        GROUP BY 1,2,3,4 
+    """
+    data=db.executeQuery(query, val = ())
+    words = []
+    event_name = []
+    event_description = []
+    event_date = []
+    event_address = []
+    for row in data:
+        event_name.append(row[0])
+        words.append(row[4].split(','))
+        event_description.append(row[1])
+        event_date.append(row[2])
+        event_address.append(row[3])
+    db.destruct()
+    return {
+        "event_tags" : words,
+        "event_name" : event_name,
+        "event_description" : event_description,
+        "event_date" : event_date,
+        "event_address" : event_address
+    }

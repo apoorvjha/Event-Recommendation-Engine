@@ -404,9 +404,12 @@ function set_task_param(){
 			data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUploadAddEvent()"><table><tr><td><b>Event Name</b></td><td><input type="text" id="event_name" name="event_name" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Description</b></td><td><input type="text" id="event_description" name="event_description" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Date</b></td><td><input type="datetime-local" id="event_date" name="event_date" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Location</b></td><td><input type="text" id="event_address" name="event_address" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Tags (comma seperated (,) one word adjectives that describes event)</b></td><td><input type="text" id="event_tag" name="event_tag" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><input type="submit" value="Change" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="event_check"></div></center>';
 		}
 		else if(code==6){
-			data="<center>";
-			//  data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUpload()" action="changeProfilePicture"><table><tr><td><b>New Profile Picture</b></td><td><input type="file" id="profpic" name="profpic" onChange="validateUpload()" name="profpic"></td></tr><tr><td><input type="submit" value="Change" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="filecheck"></div></center>';
-			data += "<h1>WIP</h1>"
+			data="";
+			data+='<div class="d-flex align-items-center">';
+  			data+='<strong>Fetching data...</strong>'
+  			data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
+			data+='</div>'
+			view_events();
 		}
 		else{
 			data="Invalid selection code!";
@@ -437,6 +440,36 @@ function view_interests(){
 					data+='<tr>';
 					data+='<td>'+ response.indexes[i] +'</td>';
 					data+='<td>'+ response.words[i] +'</td>';
+					data+='</tr>';
+				}
+				data+="</table>";
+				document.getElementById("task").innerHTML=data;
+			}
+		}
+	);
+}
+
+function view_events(){
+	fetch('/viewEvents')
+	.then((res)=>{
+		return res.json()
+	})
+	.then(
+		(response)=>{
+			// console.log(response)
+			if(response.status==200){
+				let data="";
+				data+="<b>Events fetched successfully!</b><br>";
+				data+='<table class="user-data-div">';
+				data+='<tr><th>Event Name</th><th>Event Description</th><th>Event Date</th><th>Event Address</th><th>Event Tags</th></tr>';
+				
+				for(i = 0; i< response.event_name.length; i = i+1){
+					data+='<tr>';
+					data+='<td>'+ response.event_name[i] +'</td>';
+					data+='<td>'+ response.event_description[i] +'</td>';
+					data+='<td>'+ response.event_date[i] +'</td>';
+					data+='<td>'+ response.event_address[i] +'</td>';
+					data+='<td>'+ response.event_tags[i] +'</td>';
 					data+='</tr>';
 				}
 				data+="</table>";

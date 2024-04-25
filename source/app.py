@@ -187,44 +187,44 @@ def addEvent():
 
             # print(context_words, event_name, event_description, event_date, event_address)
 
-            try:
-                config = read_config()
-                vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
-                embedding_matrix = get_embedding(config, context_words)
-                vector_database.insert(
-                    context_words,
-                    embedding_matrix.cpu().numpy().tolist()
-                )
-                vector_database.save_vector_db()
-                word_indexes = vector_database.get_word_indexes(context_words)
-                # vector_database.destruct()
-                Auth.save_event(word_indexes, event_name, event_description, event_date, event_address)
+            # try:
+            config = read_config()
+            vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+            embedding_matrix = get_embedding(config, context_words)
+            vector_database.insert(
+                context_words,
+                embedding_matrix.cpu().numpy().tolist()
+            )
+            vector_database.save_vector_db()
+            word_indexes = vector_database.get_word_indexes(context_words)
+            # vector_database.destruct()
+            Auth.save_event(word_indexes, event_name, event_description, event_date, event_address)
 
-                data = Auth.get_word_index()
-                word_indexes_ = []
-                for i in range(len(data)):
-                    word_indexes_.append(data[i][1])
-                exclude_list = vector_database.get_words(word_indexes_)
-                response = pd.DataFrame()
-                for i in range(len(data)):
-                    word_indexes = data[i][1]
-                    userID = data[i][0]
-                    query_words = vector_database.get_words([word_indexes])
-                    search_word_embedding = get_embedding(config, query_words)
-                    k = config["TOP_K"]
-                    for i in range(len(query_words)):
-                        matching_words = vector_database.search(search_word_embedding.cpu().numpy().tolist()[i], k = k, exclude_list = exclude_list)
-                        matching_words["userID"] = userID
-                        response = pd.concat([response, matching_words], axis = 0, ignore_index = True)
-                    response = response.sort_values(by = "Similarity_Score", ascending = False)
-                response["eventID"] = response["Index"].apply(lambda x: ', '.join(Auth.get_event_id(x)))
-                Auth.save_recommendation(response[["eventID", "userID"]])
-                vector_database.destruct()
-                flash("Event created successfully!","alert alert-success")
-                return redirect(url_for('index'))
-            except Exception as e:
-                print(f"Add Event Exception ==> {e}")
-                return {"status" : 500}
+            data = Auth.get_word_index()
+            word_indexes_ = []
+            for i in range(len(data)):
+                word_indexes_.append(data[i][1])
+            exclude_list = vector_database.get_words(word_indexes_)
+            response = pd.DataFrame()
+            for i in range(len(data)):
+                word_indexes = data[i][1]
+                userID = data[i][0]
+                query_words = vector_database.get_words([word_indexes])
+                search_word_embedding = get_embedding(config, query_words)
+                k = config["TOP_K"]
+                for i in range(len(query_words)):
+                    matching_words = vector_database.search(search_word_embedding.cpu().numpy().tolist()[i], k = k, exclude_list = exclude_list)
+                    matching_words["userID"] = userID
+                    response = pd.concat([response, matching_words], axis = 0, ignore_index = True)
+                response = response.sort_values(by = "Similarity_Score", ascending = False)
+            response["eventID"] = response["Index"].apply(lambda x: ', '.join(Auth.get_event_id(x)))
+            Auth.save_recommendation(response[["eventID", "userID"]])
+            vector_database.destruct()
+            flash("Event created successfully!","alert alert-success")
+            return redirect(url_for('index'))
+            # except Exception as e:
+            #     print(f"Add Event Exception ==> {e}")
+            #     return {"status" : 500}
         else:
             return {"status" : 404}
 

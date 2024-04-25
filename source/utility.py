@@ -9,4 +9,10 @@ def read_config(path = "../configuration/configuration.json"):
         print(f"Failed to read configuration from {path} due to {e}")
 
 def str_to_list_cvtr(x):
-    return list(map(lambda y: float(y), x.replace('[','').replace(']','').split(', ')))
+    # print("Debug : ", x)
+    try:
+        response = list(map(lambda y: float(y), x.replace('[','').replace(']','').split(', ')))
+        return response
+    except Exception as e:
+        print("Error : ", e)
+        return x

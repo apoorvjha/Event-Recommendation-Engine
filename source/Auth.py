@@ -10,6 +10,7 @@ class DBOps:
         self.table_name = config["AUTH_TABLE_NAME"]
         self.interest_mapping_table_name = config["INTEREST_MAPPING_TABLE_NAME"]
         self.event_table_name = config["EVENT_TABLE_NAME"]
+        self.event_recommendation_table_name = config["EVENT_RECOMMENDATION_TABLE_NAME"]
         cur = self.con.cursor()
         cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.table_name}(
             "username" TEXT,
@@ -33,6 +34,11 @@ class DBOps:
             "eventDescription" TEXT,
             "eventDate" TIMESTAMP,
             "eventAddress" TEXT
+        )""")
+        self.con.commit()
+        cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.event_recommendation_table_name}(
+            "eventID" TEXT,
+            "userID" INTEGER
         )""")
         self.con.commit()
     def executeQuery(self, query, val, return_mode = True):
@@ -196,6 +202,17 @@ def get_word_index_mapping(userId):
         result.append(d[0])
     return result
 
+def get_word_index():
+    config = read_config()
+    db=DBOps(config)
+    query="SELECT userID, WordIndex FROM "+config['INTEREST_MAPPING_TABLE_NAME']
+    val=()
+    data = db.executeQuery(query, val, return_mode = True)
+    result = []
+    for d in data:
+        result.append([d[0],d[1]])
+    return result
+
 def create_index():
     date_component = datetime.now() + timedelta(days = np.random.randint(-100, 100))
     return hashlib.md5(date_component.strftime("%Y-%m-%d").encode()).hexdigest()[ : 16]
@@ -216,21 +233,42 @@ def save_event(word_indexes, event_name, event_description, event_date, event_ad
     db.destruct()
     return
 
-def get_events():
+def get_events(userID = None):
     config = read_config()
     db=DBOps(config)
-    query = f"""
-        SELECT
-            eventName,
-            eventDescription,
-            eventDate,
-            eventAddress,
-            GROUP_CONCAT(WordIndex) as WordIndex 
-        FROM 
-            {config['EVENT_TABLE_NAME']}
-        GROUP BY 1,2,3,4 
-    """
-    data=db.executeQuery(query, val = ())
+    if userID is None:
+        query = f"""
+            SELECT
+                eventName,
+                eventDescription,
+                eventDate,
+                eventAddress,
+                GROUP_CONCAT(WordIndex) as WordIndex 
+            FROM 
+                {config['EVENT_TABLE_NAME']}
+            GROUP BY 1,2,3,4 
+        """
+        val = ()
+    else:
+        query = f"""
+            SELECT
+                a.eventName,
+                a.eventDescription,
+                a.eventDate,
+                a.eventAddress,
+                GROUP_CONCAT(a.WordIndex) as WordIndex 
+            FROM 
+                {config['EVENT_TABLE_NAME']} a
+            INNER JOIN
+                {config['EVENT_RECOMMENDATION_TABLE_NAME']} b
+            ON
+                a.eventID = b.eventID
+            WHERE
+                b.userID = ?
+            GROUP BY 1,2,3,4 
+        """
+        val = (userID,)
+    data=db.executeQuery(query, val = val)
     words = []
     event_name = []
     event_description = []
@@ -250,3 +288,26 @@ def get_events():
         "event_date" : event_date,
         "event_address" : event_address
     }
+
+def get_event_id(WordIndex):
+    config = read_config()
+    db=DBOps(config)
+    query = f"""
+    SELECT 
+        eventID
+    FROM
+        {config['EVENT_TABLE_NAME']}
+    WHERE
+        WordIndex = ?
+    GROUP BY 1
+    """
+    data = db.executeQuery(query, val = (WordIndex,))
+    result = []
+    for i in range(len(data)):
+        result.append(data[i][0])
+    return result
+
+def save_recommendation(data):
+    config = read_config()
+    db=DBOps(config)
+    data.drop_duplicates().to_sql(name = db.event_recommendation_table_name, con = db.con, if_exists = "replace", index = False)

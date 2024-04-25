@@ -43,8 +43,10 @@ class VectorDatabase:
             data.append([index, value.lower(), embedding])
         temp_df = self.create_vector_db_instance(data, mode = 1)
         self.vector_db = pd.concat([self.vector_db, temp_df], axis = 0, ignore_index = True)
-    def search(self, embedding, k = 10):
+    def search(self, embedding, k = 10, exclude_list = []):
         temp_df = self.vector_db.copy()
+        if len(exclude_list) > 0 :
+            temp_df = temp_df[~temp_df["Value"].isin(exclude_list)]
         try:
             temp_df["Similarity_Score"] = temp_df["Embedding"].apply(lambda x : self.cosine_similarity(str_to_list_cvtr(x), embedding))
         except:

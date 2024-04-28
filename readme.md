@@ -26,6 +26,10 @@ TODO:
     3. Create the frontend screens -> In-Progress
 
 
+PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine> python -m pip install -r requirements.txt  # Install the dependencies.
+
+========================================================================================================================
+
 PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine> cd data   # This folder contains the db files.
 PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine\data> python # Shell for python terminal
 Python 3.11.5 (tags/v3.11.5:cce6ba9, Aug 24 2023, 14:38:34) [MSC v.1936 64 bit (AMD64)] on win32
@@ -47,6 +51,13 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> cursor.execute("UPDATE CREDENTIALS SET type = 'admin' WHERE username = 'user02'")
 <sqlite3.Cursor object at 0x00000237C9F68A40>
 >>> con.commit()
+
+========================================================================================
+
+# Following command to run the app
+
+PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine> cd .\source\
+PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine\source> python .\app.py
 
 
 ayushagrawal6082@gmail.com

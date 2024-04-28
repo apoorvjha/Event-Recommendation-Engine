@@ -58,6 +58,3 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine> cd .\source\
 PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine\source> python .\app.py
-
-
-ayushagrawal6082@gmail.com

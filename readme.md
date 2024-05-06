@@ -58,3 +58,13 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine> cd .\source\
 PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine\source> python .\app.py
+
+=======================================================================================
+
+
+1. Image in the Events.
+2. Delete from the view All Events (For Admin).
+3. Add the recommendations for newly inducted users. -> Done
+4. User's list of all the event subsribers.
+
+=======================================================================================

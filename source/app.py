@@ -279,9 +279,42 @@ def viewRecommendedEvents():
         if request.method=='GET':
             try:
                 config = read_config()
+                vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+                word_indexes = Auth.get_word_index_mapping(session['userId'])
+                if len(word_indexes) > 0:
+                    data = Auth.get_word_index()
+                    word_indexes_ = []
+                    for i in range(len(data)):
+                        word_indexes_.append(data[i][1])
+                    exclude_list = vector_database.get_words(word_indexes_)
+                    response = pd.DataFrame()
+                    for i in range(len(data)):
+                        word_indexes = data[i][1]
+                        userID = data[i][0]
+                        query_words = vector_database.get_words([word_indexes])
+                        search_word_embedding = get_embedding(config, query_words)
+                        k = config["TOP_K"]
+                        for i in range(len(query_words)):
+                            matching_words = vector_database.search(search_word_embedding.cpu().numpy().tolist()[i], k = k, exclude_list = exclude_list)
+                            matching_words["userID"] = userID
+                            response = pd.concat([response, matching_words], axis = 0, ignore_index = True)
+                        response = response.sort_values(by = "Similarity_Score", ascending = False)
+                    response["eventID"] = response["Index"].apply(lambda x: ', '.join(Auth.get_event_id(x)))
+                    Auth.save_recommendation(response[["eventID", "userID"]])
+                    # vector_database.destruct()
+                    # flash("Event created successfully!","alert alert-success")
+                else:
+                
+                    events = Auth.get_events()["event_id"][config["TOP_K"]]
+                    data = pd.DataFrame({
+                        "eventID" : events,
+                        "userID" : [session['userId'] for i in range(len(events))]
+                    })
+                    Auth.save_recommendation(data, mode = "append")
+
                 data = Auth.get_events(session['userId'])
                 word_indexes = data["event_tags"]
-                vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+
                 event_tags = []
                 for wi in word_indexes:
                     if isinstance(wi, list): 

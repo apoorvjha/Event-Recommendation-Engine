@@ -239,6 +239,7 @@ def get_events(userID = None):
     if userID is None:
         query = f"""
             SELECT
+                eventID,
                 eventName,
                 eventDescription,
                 eventDate,
@@ -246,12 +247,13 @@ def get_events(userID = None):
                 GROUP_CONCAT(WordIndex) as WordIndex 
             FROM 
                 {config['EVENT_TABLE_NAME']}
-            GROUP BY 1,2,3,4 
+            GROUP BY 1,2,3,4,5 
         """
         val = ()
     else:
         query = f"""
             SELECT
+                a.eventID,
                 a.eventName,
                 a.eventDescription,
                 a.eventDate,
@@ -265,7 +267,7 @@ def get_events(userID = None):
                 a.eventID = b.eventID
             WHERE
                 b.userID = ?
-            GROUP BY 1,2,3,4 
+            GROUP BY 1,2,3,4,5 
         """
         val = (userID,)
     data=db.executeQuery(query, val = val)
@@ -274,14 +276,17 @@ def get_events(userID = None):
     event_description = []
     event_date = []
     event_address = []
+    event_id = []
     for row in data:
-        event_name.append(row[0])
-        words.append(row[4].split(','))
-        event_description.append(row[1])
-        event_date.append(row[2])
-        event_address.append(row[3])
+        event_id.append(row[0])
+        event_name.append(row[1])
+        words.append(row[5].split(','))
+        event_description.append(row[2])
+        event_date.append(row[3])
+        event_address.append(row[4])
     db.destruct()
     return {
+        "event_id" : event_id,
         "event_tags" : words,
         "event_name" : event_name,
         "event_description" : event_description,
@@ -307,7 +312,7 @@ def get_event_id(WordIndex):
         result.append(data[i][0])
     return result
 
-def save_recommendation(data):
+def save_recommendation(data, mode = "replace"):
     config = read_config()
     db=DBOps(config)
-    data.drop_duplicates().to_sql(name = db.event_recommendation_table_name, con = db.con, if_exists = "replace", index = False)
+    data.drop_duplicates().to_sql(name = db.event_recommendation_table_name, con = db.con, if_exists = mode, index = False)

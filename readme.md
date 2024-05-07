@@ -62,9 +62,9 @@ PS C:\Users\dell\Desktop\temp\Event_Recommendation_Engine\source> python .\app.p
 =======================================================================================
 
 
-1. Image in the Events.
-2. Delete from the view All Events (For Admin).
+1. Image in the Events. -> Done
+2. Delete from the view All Events (For Admin). -> Done
 3. Add the recommendations for newly inducted users. -> Done
-4. User's list of all the event subsribers.
+4. User's list of all the event subsribers. -> Done
 
 =======================================================================================

@@ -33,7 +33,8 @@ class DBOps:
             "eventName" TEXT,
             "eventDescription" TEXT,
             "eventDate" TIMESTAMP,
-            "eventAddress" TEXT
+            "eventAddress" TEXT,
+            "eventPic" TEXT
         )""")
         self.con.commit()
         cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.event_recommendation_table_name}(
@@ -113,7 +114,28 @@ def register(userId,password,email,profilePath):
 def getUsers():
     config = read_config()
     db=DBOps(config)
-    query="SELECT userID,profilePic,username,email,isActive FROM "+config['AUTH_TABLE_NAME']+" WHERE type='user'"
+    query=f"""
+        SELECT
+            U.userID,
+            U.profilePic,
+            U.username,
+            U.email,
+            U.isActive, 
+            GROUP_CONCAT(Ev.eventName)
+        FROM 
+            {config['AUTH_TABLE_NAME']} U
+        INNER JOIN
+            {config['EVENT_RECOMMENDATION_TABLE_NAME']} E
+        ON
+            U.userID = E.userID
+        INNER JOIN 
+            {config['EVENT_TABLE_NAME']} Ev
+        ON
+            E.eventID = Ev.eventID
+        WHERE 
+            U.type='user'
+        GROUP BY 1,2,3,4,5
+    """
     data=db.executeQuery(query, val = ())
     db.destruct()
     return data
@@ -217,18 +239,18 @@ def create_index():
     date_component = datetime.now() + timedelta(days = np.random.randint(-100, 100))
     return hashlib.md5(date_component.strftime("%Y-%m-%d").encode()).hexdigest()[ : 16]
 
-def save_event(word_indexes, event_name, event_description, event_date, event_address):
+def save_event(word_indexes, event_name, event_description, event_date, event_address, event_pic):
     config = read_config()
     db=DBOps(config)
     event_id = create_index()
-    query="INSERT INTO "+config['EVENT_TABLE_NAME']+" (eventID, WordIndex, eventName, eventDescription, eventDate, eventAddress) VALUES (?, ?, ?, ?, ?, ?)"
+    query="INSERT INTO "+config['EVENT_TABLE_NAME']+" (eventID, WordIndex, eventName, eventDescription, eventDate, eventAddress, eventPic) VALUES (?, ?, ?, ?, ?, ?, ?)"
     check_query = "SELECT COUNT(*) FROM "+config['EVENT_TABLE_NAME']+" WHERE eventName = ? AND WordIndex = ?"
     for word_index in word_indexes:
         val=(event_name, word_index)
         count = db.executeQuery(check_query, val)
         if count[0][0] != 0:
             continue
-        val1 = (event_id, word_index, event_name, event_description, event_date, event_address)
+        val1 = (event_id, word_index, event_name, event_description, event_date, event_address, event_pic)
         db.executeQuery(query, val1, return_mode = False)
     db.destruct()
     return
@@ -244,10 +266,11 @@ def get_events(userID = None):
                 eventDescription,
                 eventDate,
                 eventAddress,
-                GROUP_CONCAT(WordIndex) as WordIndex 
+                eventPic,
+                GROUP_CONCAT(WordIndex) as WordIndex
             FROM 
                 {config['EVENT_TABLE_NAME']}
-            GROUP BY 1,2,3,4,5 
+            GROUP BY 1,2,3,4,5,6 
         """
         val = ()
     else:
@@ -258,6 +281,7 @@ def get_events(userID = None):
                 a.eventDescription,
                 a.eventDate,
                 a.eventAddress,
+                a.eventPic,
                 GROUP_CONCAT(a.WordIndex) as WordIndex 
             FROM 
                 {config['EVENT_TABLE_NAME']} a
@@ -267,7 +291,7 @@ def get_events(userID = None):
                 a.eventID = b.eventID
             WHERE
                 b.userID = ?
-            GROUP BY 1,2,3,4,5 
+            GROUP BY 1,2,3,4,5,6 
         """
         val = (userID,)
     data=db.executeQuery(query, val = val)
@@ -277,10 +301,12 @@ def get_events(userID = None):
     event_date = []
     event_address = []
     event_id = []
+    event_pic = []
     for row in data:
         event_id.append(row[0])
         event_name.append(row[1])
-        words.append(row[5].split(','))
+        event_pic.append(row[5])
+        words.append(row[6].split(','))
         event_description.append(row[2])
         event_date.append(row[3])
         event_address.append(row[4])
@@ -291,7 +317,8 @@ def get_events(userID = None):
         "event_name" : event_name,
         "event_description" : event_description,
         "event_date" : event_date,
-        "event_address" : event_address
+        "event_address" : event_address,
+        "event_pic" : event_pic
     }
 
 def get_event_id(WordIndex):
@@ -316,3 +343,15 @@ def save_recommendation(data, mode = "replace"):
     config = read_config()
     db=DBOps(config)
     data.drop_duplicates().to_sql(name = db.event_recommendation_table_name, con = db.con, if_exists = mode, index = False)
+
+def delete_events(event_id):
+    config = read_config()
+    db=DBOps(config)
+    query="DELETE FROM "+config['EVENT_TABLE_NAME']+" WHERE eventID = ?"
+    val = (event_id, )
+    db.executeQuery(query, val, return_mode = False)
+    query="DELETE FROM "+db.event_recommendation_table_name+" WHERE eventID = ?"
+    val = (event_id, )
+    db.executeQuery(query, val, return_mode = False)
+    db.destruct()
+

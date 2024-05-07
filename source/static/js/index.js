@@ -136,7 +136,7 @@ function getUsersData(){
 	.then(
 		(data)=>{
 			if(data.users.length > 0){
-				let users='<div class="user-data-div"><table><tr><th>User ID</th><th>Profile</th><th>Username</th><th>Email</th><th>Action</th></tr>';
+				let users='<div class="user-data-div"><table><tr><th>User ID</th><th>Profile</th><th>Username</th><th>Email</th><th>Event Name</th><th>Action</th></tr>';
 				data.users.map(
 					(user)=>{
 						users=users.concat("<tr>");
@@ -144,6 +144,8 @@ function getUsersData(){
 						users=users.concat('<td><img src="'+ user.profilePic +'" class="profile"></td>');
 						users=users.concat("<td>"+ user.username +"</td>");
 						users=users.concat("<td>"+ user.email +"</td>");
+						users=users.concat("<td>"+ user.eventName +"</td>");
+						// users=users.concat('<td><img src = "'+ user.eventPic +'" class = "result_img" ></td>');
 						if(user.isActive == 1){
 							users=users.concat('<td><input type="submit" class="btn btn-danger" value="Deactivate" onClick="deactivate('+ user.userID +')"></td>');	
 						}
@@ -404,7 +406,7 @@ function set_task_param(){
 		}
 		else if(code==5){
 			data="<center>";
-			data+='<form method="post" enctype="multipart/form-data" onSubmit="return validateAndUploadAddEvent()"><table><tr><td><b>Event Name</b></td><td><input type="text" id="event_name" name="event_name" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Description</b></td><td><input type="text" id="event_description" name="event_description" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Date</b></td><td><input type="datetime-local" id="event_date" name="event_date" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Location</b></td><td><input type="text" id="event_address" name="event_address" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><b>Event Tags (comma seperated (,) one word adjectives that describes event)</b></td><td><input type="text" id="event_tag" name="event_tag" onChange="validateAndUploadAddEvent()"></td></tr><tr><td><input type="submit" value="Change" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="event_check"></div></center>';
+			data+='<form method="post" enctype="multipart/form-data", action = "addEvent"><table><tr><td><b>Event Name</b></td><td><input type="text" id="event_name" name="event_name"></td></tr><tr><td><b>Event Description</b></td><td><input type="text" id="event_description" name="event_description"></td></tr><tr><td><b>Event Date</b></td><td><input type="datetime-local" id="event_date" name="event_date"></td></tr><tr><td><b>Event Location</b></td><td><input type="text" id="event_address" name="event_address"></td></tr><tr><td><b>Event Tags (comma seperated (,) one word adjectives that describes event)</b></td><td><input type="text" id="event_tag" name="event_tag"></td></tr><tr><td><b>New Profile Picture</b></td><td><input type="file" id="eventpic" name="eventpic" name="eventpic"></td></tr><tr><td><input type="submit" value="Change" class="btn btn-primary"></td><td><input type="reset" value="Cancel" class="btn btn-danger"></td></tr></table></form><div id="event_check"></div></center>';
 		}
 		else if(code==6){
 			data="";
@@ -464,7 +466,7 @@ function view_recommended_events(){
 				let data="";
 				data+="<b>Events fetched successfully!</b><br>";
 				data+='<table class="user-data-div">';
-				data+='<tr><th>Event Name</th><th>Event Description</th><th>Event Date</th><th>Event Address</th><th>Event Tags</th></tr>';
+				data+='<tr><th>Event Name</th><th>Event Description</th><th>Event Date</th><th>Event Address</th><th>Event Tags</th><th>Event Image</th></tr>';
 				
 				for(i = 0; i< response.event_name.length; i = i+1){
 					data+='<tr>';
@@ -473,6 +475,7 @@ function view_recommended_events(){
 					data+='<td>'+ response.event_date[i] +'</td>';
 					data+='<td>'+ response.event_address[i] +'</td>';
 					data+='<td>'+ response.event_tags[i] +'</td>';
+					data+='<td><img src = "'+ response.event_pic[i] +'" class = "result_img"></td>';
 					data+='</tr>';
 				}
 				data+="</table>";
@@ -494,7 +497,7 @@ function view_events(){
 				let data="";
 				data+="<b>Events fetched successfully!</b><br>";
 				data+='<table class="user-data-div">';
-				data+='<tr><th>Event Name</th><th>Event Description</th><th>Event Date</th><th>Event Address</th><th>Event Tags</th></tr>';
+				data+='<tr><th>Event Name</th><th>Event Description</th><th>Event Date</th><th>Event Address</th><th>Event Tags</th><th>Event Image</th><th>Delete Event</th></tr>';
 				
 				for(i = 0; i< response.event_name.length; i = i+1){
 					data+='<tr>';
@@ -503,10 +506,26 @@ function view_events(){
 					data+='<td>'+ response.event_date[i] +'</td>';
 					data+='<td>'+ response.event_address[i] +'</td>';
 					data+='<td>'+ response.event_tags[i] +'</td>';
+					data+='<td><img src = "'+ response.event_pic[i] +'" class = "result_img"></td>';
+					data+='<td><input type="submit" class="btn btn-danger" value="Delete" onClick="delete_event(\''+ response.event_id[i] +'\')"></td>';
 					data+='</tr>';
 				}
 				data+="</table>";
 				document.getElementById("task").innerHTML=data;
+			}
+		}
+	);
+}
+
+function delete_event(id){
+	fetch('/delete_event/'+id)
+	.then((res)=>{
+		return res.json()
+	})
+	.then(
+		(response)=>{
+			if(response.status==200){
+				view_events();
 			}
 		}
 	);
@@ -519,9 +538,25 @@ function validateAndUploadAddEvent(){
 	var event_date = document.getElementById("event_date")
 	var event_address = document.getElementById("event_address")
 	var fInput = document.getElementById("event_tag")
+	var eventpic = document.getElementById("eventpic")
 	var strings = fInput.value.split(',').map(s => s.trim());
 	console.log(event_name.value + event_description.value + event_address.value + event_date.value + strings);
 	var flag = 1
+
+	if(eventpic.value.length!=0){
+		/* file validation */
+		var validExt= /(\.jpg|\.jpeg|\.png|\.gif)$/i;
+		if (!validExt.exec(eventpic.value)) {
+			document.getElementById("event_check").innerHTML='<font color="red">Only JPEG, JPG, PNG and GIF formats are supported!</font>';
+			eventpic.style.borderColor="red";
+			flag=0;
+		}
+	}
+	else{
+		document.getElementById("event_check").innerHTML='<font color="red">Only JPEG, JPG, PNG and GIF formats are supported!</font>';
+		eventpic.style.borderColor="red";
+		flag = 0
+	}
 
 	if(strings.length!=0){
 		/* file validation */
@@ -577,33 +612,46 @@ function validateAndUploadAddEvent(){
 		event_description.style.borderColor="green";
 		event_date.style.borderColor="green";
 		event_address.style.borderColor="green";
-		
+		eventpic.style.borderColor="green";
 		
 		let formData=new FormData();
-		// formData.append('interest_words',strings);
-		let requestOptions = {
-			method: 'POST',
-			body: JSON.stringify(
-				{
-					"context_words" : strings,
-					"event_name" : event_name.value,
-					"event_description" : event_description.value,
-					"event_date" : event_date.value,
-					"event_address" : event_address.value 
-				}
-			),
-			redirect: 'follow',
-			headers: {
-				'Content-Type': 'application/json'
-			}
-	  };	
+		formData.append('context_words',strings);
+		formData.append('event_name',event_name.value);
+		formData.append('event_description',event_description.value);
+		formData.append('event_date',event_date.value);
+		formData.append('event_address',event_address.value);
+		formData.append('event_pic',eventpic.files[0]);
+	// 	let requestOptions = {
+	// 		method: 'POST',
+	// 		body: JSON.stringify(
+	// 			{
+	// 				"context_words" : strings,
+	// 				"event_name" : event_name.value,
+	// 				"event_description" : event_description.value,
+	// 				"event_date" : event_date.value,
+	// 				"event_address" : event_address.value,
+	// 				"eventpic" : eventpic.files[0]
+	// 			}
+	// 		),
+	// 		redirect: 'follow',
+	// 		headers: {
+	// 			'Content-Type': 'application/json'
+	// 		}
+	//   };	
 		let data="";
 		data+='<div class="d-flex align-items-center">';
 		data+='<strong>Adding Event...</strong>'
 		data+='<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>'
 		data+='</div>'
 		document.getElementById("task").innerHTML=data;
-	fetch("/addEvent", requestOptions)
+	fetch("/addEvent", {
+		"method" : "POST",
+		"body" : formData,
+		redirect: 'follow',
+		headers: {
+			'Content-Type': 'multipart/form-data'
+		}
+	})
 	.then(response => {
 		data='';
 		data+='<div class="d-flex align-items-center">';

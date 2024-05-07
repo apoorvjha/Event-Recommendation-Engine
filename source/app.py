@@ -84,7 +84,7 @@ def getUsers():
         response={"users" : []}
         users=Auth.getUsers()
         for i in users:
-            response["users"].append({"userID" : i[0],"profilePic" : i[1], "username" : i[2], "email" : i[3],"isActive" : i[4]})
+            response["users"].append({"userID" : i[0],"profilePic" : i[1], "username" : i[2], "email" : i[3],"isActive" : i[4], "eventName" : i[5]})#, "eventPic" : i[6]})
         return response
     else:
         #flash("You donot have access to this endpoint!","alert alert-danger")
@@ -177,13 +177,18 @@ def addInterest():
 def addEvent():
     if session['type']=='admin':
         if request.method=='POST':
-            data = request.get_json()
+            data = request.form#.get_json()
 
-            context_words = data["context_words"]
+            context_words = data["event_tag"].split(',')
             event_name = data["event_name"]
             event_description = data["event_description"]
             event_date = data["event_date"]
             event_address = data["event_address"]
+            eventPic = request.files['eventpic']
+
+            fileName = event_name + secure_filename(eventPic.filename)
+            eventPic.save('./static/EVENT_PIC/'+fileName)
+            event_pic_path='./static/EVENT_PIC/'+fileName
 
             # print(context_words, event_name, event_description, event_date, event_address)
 
@@ -198,7 +203,7 @@ def addEvent():
             vector_database.save_vector_db()
             word_indexes = vector_database.get_word_indexes(context_words)
             # vector_database.destruct()
-            Auth.save_event(word_indexes, event_name, event_description, event_date, event_address)
+            Auth.save_event(word_indexes, event_name, event_description, event_date, event_address, event_pic_path)
 
             data = Auth.get_word_index()
             word_indexes_ = []
@@ -217,8 +222,22 @@ def addEvent():
                     matching_words["userID"] = userID
                     response = pd.concat([response, matching_words], axis = 0, ignore_index = True)
                 response = response.sort_values(by = "Similarity_Score", ascending = False)
-            response["eventID"] = response["Index"].apply(lambda x: ', '.join(Auth.get_event_id(x)))
-            Auth.save_recommendation(response[["eventID", "userID"]])
+            if response.shape[0] > 0:
+                response["eventID"] = response["Index"].apply(lambda x: ', '.join(Auth.get_event_id(x)))
+                Auth.save_recommendation(response[["eventID", "userID"]])
+            else:
+                events = pd.DataFrame({"eventID" : Auth.get_events()["event_id"][ : config["TOP_K"]]})
+                users_d=Auth.getUsers()
+                users = []
+                for i in users_d:
+                    users.append(i[0]) 
+                data = pd.DataFrame({
+                    "userID" : users
+                })
+                events["dummy_key"] = 1
+                data["dummy_key"] = 1
+                data = data.merge(events, on = "dummy_key", how = "outer").drop(columns= ["dummy_key"])
+                Auth.save_recommendation(data, mode = "append")
             vector_database.destruct()
             flash("Event created successfully!","alert alert-success")
             return redirect(url_for('index'))
@@ -305,7 +324,7 @@ def viewRecommendedEvents():
                     # flash("Event created successfully!","alert alert-success")
                 else:
                 
-                    events = Auth.get_events()["event_id"][config["TOP_K"]]
+                    events = Auth.get_events()["event_id"][ : config["TOP_K"]]
                     data = pd.DataFrame({
                         "eventID" : events,
                         "userID" : [session['userId'] for i in range(len(events))]
@@ -346,6 +365,17 @@ def viewInterest():
                 print(e)
                 return {"status" : 500}
     else:
+        return {"status" : 404}
+
+@app.route('/delete_event/<id>')
+def delete_event(id):
+    if session['type']=='admin':
+        print(id, type(id))
+        Auth.delete_events(id)
+        #flash("User deactivated successfully!","alert alert-success")
+        return {"status" : 200}
+    else:
+        #flash("You donot have access to this endpoint!","alert alert-danger")
         return {"status" : 404}
 
 @app.route("/api/v1/set_context_phrases", methods = ["POST"])

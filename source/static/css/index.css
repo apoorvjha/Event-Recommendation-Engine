@@ -25,7 +25,7 @@ body{
 .form {
     background-color: white;
     padding: 50px;
-    width : 700px;
+    width : 1000px;
 	border-style: groove;
 	border-right-color:grey;
 	border-bottom-width: 10px;
@@ -37,7 +37,7 @@ body{
 .form1 {
     background-color: white;
     padding: 50px;
-    width : 900px;
+    width : 1000px;
 	border-style: groove;
 	border-right-color:grey;
 	border-bottom-width: 10px;
@@ -61,7 +61,7 @@ body{
     background-color: white;
     color : black;
     padding : 10px;
-    width : 700px;
+    width : 1000px;
     border-style: groove;
 	border-right-color:grey;
 	border-bottom-width: 10px;
@@ -75,7 +75,7 @@ body{
     background-color: white;
     color : black;
     padding : 10px;
-    width : 700px;
+    width : 1000px;
     border-style: groove;
 	border-right-color:grey;
 	border-bottom-width: 10px;

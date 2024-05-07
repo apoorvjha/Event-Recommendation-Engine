@@ -103,13 +103,17 @@ def register(userId,password,email,profilePath):
     count=db.executeQuery(query_check, val)
     if count[0][0]!=0:
         db.destruct()
-        return False 
+        return False, ""
     else:   
         query="INSERT INTO "+config['AUTH_TABLE_NAME']+"(username,password,email,profilePic,type,isActive) VALUES (?,?,?,?,?,?)"
         val=(userId,password,email,profilePath,'user',1)
         db.executeQuery(query, val, return_mode=False)
+
+        query = "SELECT userID FROM "+config['AUTH_TABLE_NAME']+" WHERE username = ? and email = ?"
+        val = (userId, email)
+        data = db.executeQuery(query, val)
         db.destruct()
-        return True
+        return True, data[0][0]
 
 def getUsers():
     config = read_config()

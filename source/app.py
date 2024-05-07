@@ -67,17 +67,17 @@ def registerBack():
         fileName=userId + secure_filename(profilePic.filename)
         profilePic.save('./static/PROFILE_PIC/'+fileName)
         profilePath='./static/PROFILE_PIC/'+fileName
-        status=Auth.register(userId,password,email,profilePath)
-
-        config = read_config()
-        vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
-        events = Auth.get_events()["event_id"][ : config["TOP_K"]]
-        data = pd.DataFrame({
-            "eventID" : events,
-            "userID" : [session['userId'] for i in range(len(events))]
-        })
-        Auth.save_recommendation(data, mode = "append")
-        vector_database.destruct()
+        status, userID=Auth.register(userId,password,email,profilePath)
+        if userID != "":
+            config = read_config()
+            vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+            events = Auth.get_events()["event_id"][ : config["TOP_K"]]
+            data = pd.DataFrame({
+                "eventID" : events,
+                "userID" : [userID for i in range(len(events))]
+            })
+            Auth.save_recommendation(data, mode = "append")
+            vector_database.destruct()
 
         if status==True:
             # as we advance, incorporate functionality of OTP verification as well.

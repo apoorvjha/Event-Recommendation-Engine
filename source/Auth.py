@@ -121,7 +121,7 @@ def getUsers():
             U.username,
             U.email,
             U.isActive, 
-            GROUP_CONCAT(Ev.eventName)
+            GROUP_CONCAT(DISTINCT Ev.eventName)
         FROM 
             {config['AUTH_TABLE_NAME']} U
         INNER JOIN

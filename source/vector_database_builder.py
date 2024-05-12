@@ -51,7 +51,10 @@ class VectorDatabase:
             temp_df["Similarity_Score"] = temp_df["Embedding"].apply(lambda x : self.cosine_similarity(str_to_list_cvtr(x), embedding))
         except:
             temp_df["Similarity_Score"] = temp_df["Embedding"].apply(lambda x : self.cosine_similarity(x, embedding))
-        temp_df = temp_df.sort_values(by = "Similarity_Score", ascending = False).head(k)
+        if k!=-1:
+            temp_df = temp_df.sort_values(by = "Similarity_Score", ascending = False).head(k)
+        else:
+            temp_df = temp_df.sort_values(by = "Similarity_Score", ascending = False)
         return temp_df
     def save_vector_db(self):
         in_db_data = self.create_vector_db_instance()

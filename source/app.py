@@ -271,14 +271,17 @@ def addEvent():
                 userID = data[i][0]
                 query_words = vector_database.get_words([word_indexes])
                 search_word_embedding = get_embedding(config, query_words)
-                k = config["TOP_K"]
                 for i in range(len(query_words)):
-                    matching_words = vector_database.search(search_word_embedding.cpu().numpy().tolist()[i], k = k, exclude_list = exclude_list)
+                    matching_words = vector_database.search(search_word_embedding.cpu().numpy().tolist()[i], k = -1, exclude_list = [])
                     matching_words["userID"] = userID
                     response = pd.concat([response, matching_words], axis = 0, ignore_index = True)
                 response = response.sort_values(by = "Similarity_Score", ascending = False)
             if response.shape[0] > 0:
-                response["eventID"] = response["Index"].apply(lambda x: ', '.join(Auth.get_event_id(x)))
+                response["eventID"] = response["Index"].apply(lambda x: Auth.get_event_id(x))
+                response = response.explode('eventID')
+                response = response[~response["eventID"].isnull()]
+                events = response["eventID"].unique()[ : config["TOP_K"]]
+                response = response[response["eventID"].isin(events)]
                 Auth.save_recommendation(response[["eventID", "userID"]])
             else:
                 events = pd.DataFrame({"eventID" : Auth.get_events()["event_id"][ : config["TOP_K"]]})
@@ -367,14 +370,17 @@ def viewRecommendedEvents():
                         userID = data[i][0]
                         query_words = vector_database.get_words([word_indexes])
                         search_word_embedding = get_embedding(config, query_words)
-                        k = config["TOP_K"]
                         for i in range(len(query_words)):
-                            matching_words = vector_database.search(search_word_embedding.cpu().numpy().tolist()[i], k = k, exclude_list = exclude_list)
+                            matching_words = vector_database.search(search_word_embedding.cpu().numpy().tolist()[i], k = -1, exclude_list = [])
                             matching_words["userID"] = userID
                             response = pd.concat([response, matching_words], axis = 0, ignore_index = True)
                         response = response.sort_values(by = "Similarity_Score", ascending = False)
-                    response["eventID"] = response["Index"].apply(lambda x: ', '.join(Auth.get_event_id(x)))
-                    Auth.save_recommendation(response[["eventID", "userID"]])
+                    response["eventID"] = response["Index"].apply(lambda x: Auth.get_event_id(x))
+                    response = response.explode('eventID')
+                    response = response[response["eventID"] != '']
+                    events = response["eventID"].unique()[ : config["TOP_K"]]
+                    response = response[response["eventID"].isin(events)]
+                    Auth.save_recommendation(response[["eventID", "userID"]].drop_duplicates(subset = ["eventID", "userID"]))
                     # vector_database.destruct()
                     # flash("Event created successfully!","alert alert-success")
                 else:
@@ -387,7 +393,7 @@ def viewRecommendedEvents():
 
                 data = Auth.get_events(session['userId'])
                 word_indexes = data["event_tags"]
-
+                print(data)
                 event_tags = []
                 for wi in word_indexes:
                     if isinstance(wi, list): 

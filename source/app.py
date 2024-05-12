@@ -8,6 +8,7 @@ from embedding_model import *
 from utility import *
 from vector_database_builder import *
 import json
+import requests 
 
 app = Flask(__name__)
 
@@ -51,16 +52,37 @@ def login_back():
             session['profilePic']=res[0][2]
             session['type']=res[0][3]
             session['userId']=res[0][4]
-            return redirect(url_for('index'))
+            return redirect(url_for('recommendations'))
         else:
             return redirect(url_for('login'))
     else:
         flash("Unsupported method of request! Please use POST instead.",'alert alert-danger')
         return redirect(url_for('index'))
+
+@app.route('/loginBackCust/<username>/<password>')
+def loginBackCust(username, password):
+    # if request.method=='POST':
+    userId=username
+    password=password
+    status,res,msg,category=Auth.checkCredentials(userId,password)
+    flash(msg,category)
+    if status==True:
+        session['username']=res[0][0]
+        session['email']=res[0][1]
+        session['profilePic']=res[0][2]
+        session['type']=res[0][3]
+        session['userId']=res[0][4]
+        return redirect(url_for('recommendations'))
+    else:
+        return redirect(url_for('login'))
+    # else:
+    #     flash("Unsupported method of request! Please use POST instead.",'alert alert-danger')
+    #     return redirect(url_for('index'))
 @app.route('/registerBack',methods=['POST'])
 def registerBack():
     if request.method=='POST':
         userId=request.form['userId']
+        username = userId
         password=request.form['password']
         email=request.form['email']
         context_words=list(map(lambda x: x.strip(), request.form['interest_words'].split(',')))
@@ -81,7 +103,7 @@ def registerBack():
             vector_database.save_vector_db()
             word_indexes = vector_database.get_word_indexes(context_words)
             vector_database.destruct()
-            Auth.save_word_index_mapping(word_indexes, session['userId'])
+            Auth.save_word_index_mapping(word_indexes, userID)
             # flash("Interest words saved successfully!","alert alert-success")
             # return redirect(url_for('index'))
         except Exception as e:
@@ -100,8 +122,10 @@ def registerBack():
 
         if status==True:
             # as we advance, incorporate functionality of OTP verification as well.
-            flash("You are successfully registered!.",'alert alert-success') 
-            return redirect(url_for('index'))
+            flash("You are successfully registered!.",'alert alert-success')
+            # res = requests.post("http://127.0.0.1:8080/loginBack",data = {"userId" : username, "password" : password}, verify = False) 
+            return redirect(url_for('loginBackCust', username = username, password = password))
+
         else:
             flash("User with provided data already exists! ",'alert alert-danger')
             return redirect(url_for('register'))
@@ -113,6 +137,7 @@ def getUsers():
     if session['type']=='admin':
         response={"users" : []}
         users=Auth.getUsers()
+        print(users)
         for i in users:
             response["users"].append({"userID" : i[0],"profilePic" : i[1], "username" : i[2], "email" : i[3],"isActive" : i[4], "eventName" : i[5]})#, "eventPic" : i[6]})
         return response

@@ -135,6 +135,7 @@ function getUsersData(){
 	)
 	.then(
 		(data)=>{
+			console.log(data)
 			if(data.users.length > 0){
 				let users='<div class="user-data-div"><table><tr><th>User ID</th><th>Profile</th><th>Username</th><th>Email</th><th>Event Name</th><th>Action</th></tr>';
 				data.users.map(

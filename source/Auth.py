@@ -128,11 +128,11 @@ def getUsers():
             GROUP_CONCAT(DISTINCT Ev.eventName)
         FROM 
             {config['AUTH_TABLE_NAME']} U
-        INNER JOIN
+        LEFT JOIN
             {config['EVENT_RECOMMENDATION_TABLE_NAME']} E
         ON
             U.userID = E.userID
-        INNER JOIN 
+        LEFT JOIN 
             {config['EVENT_TABLE_NAME']} Ev
         ON
             E.eventID = Ev.eventID

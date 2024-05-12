@@ -1,10 +1,18 @@
 {% extends 'base.html' %}
-{% block title %}About{% endblock %}
+{% block title %}Recommendation Feed{% endblock %}
 {% block main %}
 
     <div id = "recommendation_feed">
+        <div id="loading-screen">
+            <div class="loader"></div>
+            <p>Loading...</p>
+        </div>
         <script>
-            get_recommedations_feed()
+            get_recommedations_feed();
+            setTimeout(function() {
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            }, 3000000);
         </script>
 
     </div>

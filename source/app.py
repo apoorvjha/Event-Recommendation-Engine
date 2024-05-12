@@ -63,21 +63,40 @@ def registerBack():
         userId=request.form['userId']
         password=request.form['password']
         email=request.form['email']
+        context_words=list(map(lambda x: x.strip(), request.form['interest_words'].split(',')))
         profilePic=request.files['profilePic']
         fileName=userId + secure_filename(profilePic.filename)
         profilePic.save('./static/PROFILE_PIC/'+fileName)
         profilePath='./static/PROFILE_PIC/'+fileName
         status, userID=Auth.register(userId,password,email,profilePath)
-        if userID != "":
+
+        try:
             config = read_config()
             vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
-            events = Auth.get_events()["event_id"][ : config["TOP_K"]]
-            data = pd.DataFrame({
-                "eventID" : events,
-                "userID" : [userID for i in range(len(events))]
-            })
-            Auth.save_recommendation(data, mode = "append")
+            embedding_matrix = get_embedding(config, context_words)
+            vector_database.insert(
+                context_words,
+                embedding_matrix.cpu().numpy().tolist()
+            )
+            vector_database.save_vector_db()
+            word_indexes = vector_database.get_word_indexes(context_words)
             vector_database.destruct()
+            Auth.save_word_index_mapping(word_indexes, session['userId'])
+            # flash("Interest words saved successfully!","alert alert-success")
+            # return redirect(url_for('index'))
+        except Exception as e:
+            print("Failed to save interest due to : ", e)
+
+        # if userID != "":
+        #     config = read_config()
+        #     vector_database = VectorDatabase(config["VECTOR_DB"], config["VECTOR_STORE_TABLE_NAME"])
+        #     events = Auth.get_events()["event_id"][ : config["TOP_K"]]
+        #     data = pd.DataFrame({
+        #         "eventID" : events,
+        #         "userID" : [userID for i in range(len(events))]
+        #     })
+        #     Auth.save_recommendation(data, mode = "append")
+        #     vector_database.destruct()
 
         if status==True:
             # as we advance, incorporate functionality of OTP verification as well.

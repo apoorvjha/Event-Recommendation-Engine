@@ -30,18 +30,15 @@
                 <li class="nav-item">
                   <a class="nav-link" href="{{ url_for('index') }}">Home</a>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="{{ url_for('about') }}">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('static',filename='./doc/report.pdf') }}">Documentation</a>
-                  </li>
                   {% if session['type']=='admin' %}
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('admin') }}">Admin</a>
                   </li>
                   {% endif %}
                   {% if session['username'] %}
+                  <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('recommendations') }}">Recommended Events</a>
+                  </li>
                   <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('settings') }}">Settings</a>
                   </li>

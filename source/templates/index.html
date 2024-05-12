@@ -1,6 +1,49 @@
 {% extends 'base.html' %}
 {% block title %}Home{% endblock %}
 {% block main %}
-
-    <h1>Home Page</h1>
+<!-- Redirect to Login -->
+<center>
+    <div class="task" id="task">
+        <header>
+            <div class="container">
+                <h1>AI Event Manager</h1>
+                <p>Your Personalized Event Recommendation System</p>
+            </div>
+        </header>
+        <main>
+            <section class="hero">
+                <div class="container">
+                    <h2>Discover Exciting Events Near You</h2>
+                    <p>Let our AI-powered system suggest the perfect events based on your interests and preferences.</p>
+                    <button>Get Started</button>
+                </div>
+            </section>
+            <section class="features">
+                <div class="container">
+                    <h2>Features</h2>
+                    <div class="feature">
+                        <img src="../static/icons/ai-icon.png" alt="AI Icon">
+                        <h3>AI Recommendations</h3>
+                        <p>Our advanced AI algorithm learns your preferences and suggests events tailored just for you.</p>
+                    </div>
+                    <div class="feature">
+                        <img src="../static/icons/location-icon.png" alt="Location Icon">
+                        <h3>Location-based</h3>
+                        <p>Find events happening near your location, ensuring you never miss out on anything exciting.</p>
+                    </div>
+                    <div class="feature">
+                        <img src="../static/icons/calendar-icon.png" alt="Calendar Icon">
+                        <h3>Personalized Calendar</h3>
+                        <p>Keep track of your favorite events with a personalized calendar feature.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <!-- <footer>
+            <div class="container">
+                <p>&copy; 2024 Eventify. All rights reserved.</p>
+            </div>
+        </footer> -->
+    </div>
+</center>
 {% endblock %}

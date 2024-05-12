@@ -16,9 +16,9 @@ app.secret_key="EVENT_MANAGEMENT_AI_2024-03-23"
 @app.route('/')
 def index():
     return render_template('index.html')
-@app.route('/about')
-def about():
-    return render_template('about.html')
+@app.route('/recommendations')
+def recommendations():
+    return render_template('recommendations.html')
 @app.route('/login')
 def login():
     return render_template('login.html')
@@ -334,7 +334,6 @@ def viewRecommendedEvents():
                     # vector_database.destruct()
                     # flash("Event created successfully!","alert alert-success")
                 else:
-                
                     events = Auth.get_events()["event_id"][ : config["TOP_K"]]
                     data = pd.DataFrame({
                         "eventID" : events,

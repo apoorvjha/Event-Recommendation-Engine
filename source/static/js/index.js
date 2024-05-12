@@ -454,6 +454,37 @@ function view_interests(){
 	);
 }
 
+function get_recommedations_feed(){
+	fetch('/viewRecommendedEvents')
+	.then((res)=>{
+		return res.json()
+	})
+	.then(
+		(response)=>{
+			console.log(response)
+			if(response.status==200){
+				let data="";
+				data+="<b>Events fetched successfully!</b><br>";
+				data+='<table class="user-data-div">';
+				data+='<tr><th>Event Name</th><th>Event Description</th><th>Event Date</th><th>Event Address</th><th>Event Tags</th><th>Event Image</th></tr>';
+				
+				for(i = 0; i< response.event_name.length; i = i+1){
+					data+='<tr>';
+					data+='<td>'+ response.event_name[i] +'</td>';
+					data+='<td>'+ response.event_description[i] +'</td>';
+					data+='<td>'+ response.event_date[i] +'</td>';
+					data+='<td>'+ response.event_address[i] +'</td>';
+					data+='<td>'+ response.event_tags[i] +'</td>';
+					data+='<td><img src = "'+ response.event_pic[i] +'" class = "result_img"></td>';
+					data+='</tr>';
+				}
+				data+="</table>";
+				document.getElementById("recommendation_feed").innerHTML=data;
+			}
+		}
+	);
+}
+
 function view_recommended_events(){
 	fetch('/viewRecommendedEvents')
 	.then((res)=>{

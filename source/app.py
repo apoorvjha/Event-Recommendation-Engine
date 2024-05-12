@@ -279,7 +279,7 @@ def addEvent():
             if response.shape[0] > 0:
                 response["eventID"] = response["Index"].apply(lambda x: Auth.get_event_id(x))
                 response = response.explode('eventID')
-                response = response[~response["eventID"].isnull()]
+                response = response[(response["eventID"] != '') & (~response["eventID"].isnull())]
                 events = response["eventID"].unique()[ : config["TOP_K"]]
                 response = response[response["eventID"].isin(events)]
                 Auth.save_recommendation(response[["eventID", "userID"]])
@@ -377,7 +377,8 @@ def viewRecommendedEvents():
                         response = response.sort_values(by = "Similarity_Score", ascending = False)
                     response["eventID"] = response["Index"].apply(lambda x: Auth.get_event_id(x))
                     response = response.explode('eventID')
-                    response = response[response["eventID"] != '']
+                    response = response[(response["eventID"] != '') & (~response["eventID"].isnull())]
+                    print(response)
                     events = response["eventID"].unique()[ : config["TOP_K"]]
                     response = response[response["eventID"].isin(events)]
                     Auth.save_recommendation(response[["eventID", "userID"]].drop_duplicates(subset = ["eventID", "userID"]))

@@ -465,21 +465,20 @@ function get_recommedations_feed(){
 			console.log(response)
 			if(response.status==200){
 				let data="";
-				data+="<b>Events fetched successfully!</b><br>";
-				data+='<table class="user-data-div">';
-				data+='<tr><th>Event Name</th><th>Event Description</th><th>Event Date</th><th>Event Address</th><th>Event Tags</th><th>Event Image</th></tr>';
-				
+				data+='<center><div class="card-grid">'
 				for(i = 0; i< response.event_name.length; i = i+1){
-					data+='<tr>';
-					data+='<td>'+ response.event_name[i] +'</td>';
-					data+='<td>'+ response.event_description[i] +'</td>';
-					data+='<td>'+ response.event_date[i] +'</td>';
-					data+='<td>'+ response.event_address[i] +'</td>';
-					data+='<td>'+ response.event_tags[i] +'</td>';
-					data+='<td><img src = "'+ response.event_pic[i] +'" class = "result_img"></td>';
-					data+='</tr>';
+					data+='<div class = "event_recommendation_card">'
+					data+='<img src = "'+ response.event_pic[i] +'" alt="Avatar" style="width: 100%;">'
+					data+='<div class="container">'
+					data+='<h4><b>'+ response.event_name[i] +'</b></h4>'
+					data+='<p>'+ response.event_description[i] +'</p>'
+					data+='<p>'+ response.event_date[i] +'</p>'
+					data+='<p>'+ response.event_address[i] +'</p>'
+					data+='<p>'+ response.event_tags[i] +'</p>'
+					data+='</div>'
+					data+='</div>'
 				}
-				data+="</table>";
+				data+="</div></center>"
 				document.getElementById("recommendation_feed").innerHTML=data;
 			}
 		}
@@ -496,21 +495,20 @@ function view_recommended_events(){
 			// console.log(response)
 			if(response.status==200){
 				let data="";
-				data+="<b>Events fetched successfully!</b><br>";
-				data+='<table class="user-data-div">';
-				data+='<tr><th>Event Name</th><th>Event Description</th><th>Event Date</th><th>Event Address</th><th>Event Tags</th><th>Event Image</th></tr>';
-				
+				data+='<center><div class="card-grid">'
 				for(i = 0; i< response.event_name.length; i = i+1){
-					data+='<tr>';
-					data+='<td>'+ response.event_name[i] +'</td>';
-					data+='<td>'+ response.event_description[i] +'</td>';
-					data+='<td>'+ response.event_date[i] +'</td>';
-					data+='<td>'+ response.event_address[i] +'</td>';
-					data+='<td>'+ response.event_tags[i] +'</td>';
-					data+='<td><img src = "'+ response.event_pic[i] +'" class = "result_img"></td>';
-					data+='</tr>';
+					data+='<div class = "event_recommendation_card">'
+					data+='<img src = "'+ response.event_pic[i] +'" alt="Avatar" style="width: 100%;">'
+					data+='<div class="container">'
+					data+='<h4><b>'+ response.event_name[i] +'</b></h4>'
+					data+='<p>'+ response.event_description[i] +'</p>'
+					data+='<p>'+ response.event_date[i] +'</p>'
+					data+='<p>'+ response.event_address[i] +'</p>'
+					data+='<p>'+ response.event_tags[i] +'</p>'
+					data+='</div>'
+					data+='</div>'
 				}
-				data+="</table>";
+				data+="</div></center>"
 				document.getElementById("task").innerHTML=data;
 			}
 		}
@@ -527,22 +525,22 @@ function view_events(){
 			// console.log(response)
 			if(response.status==200){
 				let data="";
-				data+="<b>Events fetched successfully!</b><br>";
-				data+='<table class="user-data-div">';
-				data+='<tr><th>Event Name</th><th>Event Description</th><th>Event Date</th><th>Event Address</th><th>Event Tags</th><th>Event Image</th><th>Delete Event</th></tr>';
-				
+
+				data+='<center><div class="card-grid">'
 				for(i = 0; i< response.event_name.length; i = i+1){
-					data+='<tr>';
-					data+='<td>'+ response.event_name[i] +'</td>';
-					data+='<td>'+ response.event_description[i] +'</td>';
-					data+='<td>'+ response.event_date[i] +'</td>';
-					data+='<td>'+ response.event_address[i] +'</td>';
-					data+='<td>'+ response.event_tags[i] +'</td>';
-					data+='<td><img src = "'+ response.event_pic[i] +'" class = "result_img"></td>';
-					data+='<td><input type="submit" class="btn btn-danger" value="Delete" onClick="delete_event(\''+ response.event_id[i] +'\')"></td>';
-					data+='</tr>';
+					data+='<div class = "event_recommendation_card">'
+					data+='<img src = "'+ response.event_pic[i] +'" alt="Avatar" style="width: 100%;">'
+					data+='<div class="container">'
+					data+='<h4><b>'+ response.event_name[i] +'</b></h4>'
+					data+='<p>'+ response.event_description[i] +'</p>'
+					data+='<p>'+ response.event_date[i] +'</p>'
+					data+='<p>'+ response.event_address[i] +'</p>'
+					data+='<p>'+ response.event_tags[i] +'</p>'
+					data+='<p><input type="submit" class="btn btn-danger" value="Delete" onClick="delete_event(\''+ response.event_id[i] +'\')"></p>';
+					data+='</div>'
+					data+='</div>'
 				}
-				data+="</table>";
+				data+="</div></center>"
 				document.getElementById("task").innerHTML=data;
 			}
 		}

@@ -222,3 +222,18 @@ footer p {
     text-align: center;
     margin-top: 50px;
 }
+
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Adjust spacing between cards */
+    align-content: center;
+}
+
+.event_recommendation_card {
+    width: 300px; /* Set card width as needed */
+    padding: 20px;
+    border: 1px solid black;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+}

@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}Admin Panel{% endblock %}
 {% block main %}
+{% if session['type']=='admin' %}
 <center><span id="user_data"></span></center>
 <button onClick="getUsersData();" class="btn btn-primary" id="getUsersDataBtn">Render Users</button>
+{% else %}
+<script>
+window.location.href = "{{ url_for('index') }}"
+</script>
+{% endif %}
 {% endblock %}

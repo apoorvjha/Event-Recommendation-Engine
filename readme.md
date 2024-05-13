@@ -1,5 +1,8 @@
+# Refer to the Documentation file in the directory...
+
+
 [Introduction]
-The repository contains [WIP] end-2-end code for the event recommendation engine. 
+The repository contains end-2-end code for the event recommendation engine. 
 
 - Pretrained BERT model is used to create embeddings for context words which are essentially word tags for events. 
 - The query word which is expression of interest is also passed through the model to compute the embedding. 

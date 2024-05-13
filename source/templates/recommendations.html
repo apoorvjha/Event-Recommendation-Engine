@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Recommendation Feed{% endblock %}
 {% block main %}
+{% if session['username'] %}
 <center>
     <div class="task" id = "recommendation_feed">
         <div id="loading-screen">
@@ -17,4 +18,9 @@
 
     </div>
 </center>
+{% else %}
+<script>
+window.location.href = "{{ url_for('index') }}"
+</script>
+{% endif %}
 {% endblock %}

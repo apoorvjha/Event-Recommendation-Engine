@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Analytics{% endblock %}
 {% block main %}
+{% if session['username'] %}
 <center>
     <div class="task" id="task">
         <b>Task</b> : <select id="task_mode" onChange="set_task_param()">
@@ -16,4 +17,9 @@
         </select>
     </div>
 </center>
+{% else %}
+<script>
+window.location.href = "{{ url_for('index') }}"
+</script>
+{% endif %}
 {% endblock %}

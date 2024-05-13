@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% block title %}Logout{% endblock %}
 {% block main %}
-
+{% if session['username'] %}
     <h1>Logout Page</h1>
+    {% else %}
+    <script>
+    window.location.href = "{{ url_for('index') }}"
+    </script>
+    {% endif %}
 {% endblock %}

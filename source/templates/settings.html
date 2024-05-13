@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Profile settings{% endblock %}
 {% block main %}
+{% if session['username'] %}
     <center>
     <div class="settings" id="settings">
         <b>Change Type</b> : <select id="settings_mode" onChange="set_settings_param()">
@@ -12,4 +13,9 @@
         </select>
     </div>
     </center>
+    {% else %}
+    <script>
+    window.location.href = "{{ url_for('index') }}"
+    </script>
+    {% endif %}
 {% endblock %}

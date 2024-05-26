@@ -275,6 +275,12 @@ def addEvent():
                     matching_words = vector_database.search(search_word_embedding.cpu().numpy().tolist()[i], k = -1, exclude_list = [])
                     matching_words["userID"] = userID
                     response = pd.concat([response, matching_words], axis = 0, ignore_index = True)
+                if config["ENFORCE_FLAG"] == True:
+                    response["Similarity_Score"] = np.where(
+                                response["Value"].isin(query_words),
+                                response["Similarity_Score"].max() + 1,
+                                response["Similarity_Score"]
+                    )
                 response = response.sort_values(by = "Similarity_Score", ascending = False)
             if response.shape[0] > 0:
                 response["eventID"] = response["Index"].apply(lambda x: Auth.get_event_id(x))
@@ -374,6 +380,12 @@ def viewRecommendedEvents():
                             matching_words = vector_database.search(search_word_embedding.cpu().numpy().tolist()[i], k = -1, exclude_list = [])
                             matching_words["userID"] = userID
                             response = pd.concat([response, matching_words], axis = 0, ignore_index = True)
+                        if config["ENFORCE_FLAG"] == True:
+                            response["Similarity_Score"] = np.where(
+                                response["Value"].isin(query_words),
+                                response["Similarity_Score"].max() + 1,
+                                response["Similarity_Score"]
+                            )
                         response = response.sort_values(by = "Similarity_Score", ascending = False)
                     response["eventID"] = response["Index"].apply(lambda x: Auth.get_event_id(x))
                     response = response.explode('eventID')

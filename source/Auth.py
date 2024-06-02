@@ -135,7 +135,7 @@ def getUsers():
         FROM 
             {config['AUTH_TABLE_NAME']} U
         LEFT JOIN
-            {config['EVENT_RECOMMENDATION_TABLE_NAME']} E
+            {config['EVENT_INTEREST_TABLE_NAME']} E
         ON
             U.userID = E.userID
         LEFT JOIN 

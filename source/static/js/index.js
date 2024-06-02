@@ -137,7 +137,7 @@ function getUsersData(){
 		(data)=>{
 			console.log(data)
 			if(data.users.length > 0){
-				let users='<div class="user-data-div"><table><tr><th>User ID</th><th>Profile</th><th>Username</th><th>Email</th><th>Event Name</th><th>Action</th></tr>';
+				let users='<div class="user-data-div"><table><tr><th>User ID</th><th>Profile</th><th>Username</th><th>Email</th><th>Event Name (Showed Interest)</th><th>Action</th></tr>';
 				data.users.map(
 					(user)=>{
 						users=users.concat("<tr>");
@@ -145,7 +145,12 @@ function getUsersData(){
 						users=users.concat('<td><img src="'+ user.profilePic +'" class="profile"></td>');
 						users=users.concat("<td>"+ user.username +"</td>");
 						users=users.concat("<td>"+ user.email +"</td>");
-						users=users.concat("<td>"+ user.eventName +"</td>");
+						if (user.eventName == null){
+							users=users.concat("<td> Not Available </td>");
+						}
+						else{
+							users=users.concat("<td>"+ user.eventName +"</td>");
+						}
 						// users=users.concat('<td><img src = "'+ user.eventPic +'" class = "result_img" ></td>');
 						if(user.isActive == 1){
 							users=users.concat('<td><input type="submit" class="btn btn-danger" value="Deactivate" onClick="deactivate('+ user.userID +')"></td>');	

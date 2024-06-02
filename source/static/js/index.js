@@ -475,6 +475,12 @@ function get_recommedations_feed(){
 					data+='<p>'+ response.event_date[i] +'</p>'
 					data+='<p>'+ response.event_address[i] +'</p>'
 					data+='<p>'+ response.event_tags[i] +'</p>'
+					if(response.event_interest_flag[i] == "FALSE"){
+						data+='<p><input type="submit" class="btn btn-success" value="Show Interest" onClick="show_interest_in_event(\''+ response.event_id[i] +'\')"></p>';
+					}
+					else{
+						data+='<p><input type="submit" class="btn btn-danger" value="Remove Interest" onClick="remove_interest_in_event(\''+ response.event_id[i] +'\')"></p>';
+					}
 					data+='</div>'
 					data+='</div>'
 				}
@@ -505,11 +511,45 @@ function view_recommended_events(){
 					data+='<p>'+ response.event_date[i] +'</p>'
 					data+='<p>'+ response.event_address[i] +'</p>'
 					data+='<p>'+ response.event_tags[i] +'</p>'
+					if(response.event_interest_flag[i] == "FALSE"){
+						data+='<p><input type="submit" class="btn btn-success" value="Show Interest" onClick="show_interest_in_event(\''+ response.event_id[i] +'\')"></p>';
+					}
+					else{
+						data+='<p><input type="submit" class="btn btn-danger" value="Remove Interest" onClick="remove_interest_in_event(\''+ response.event_id[i] +'\')"></p>';
+					}	
 					data+='</div>'
 					data+='</div>'
 				}
 				data+="</div></center>"
 				document.getElementById("task").innerHTML=data;
+			}
+		}
+	);
+}
+
+function show_interest_in_event(id){
+	fetch('/show_interest_in_event/'+id)
+	.then((res)=>{
+		return res.json()
+	})
+	.then(
+		(response)=>{
+			if(response.status==200){
+				get_recommedations_feed();
+			}
+		}
+	);
+}
+
+function remove_interest_in_event(id){
+	fetch('/remove_interest_in_event/'+id)
+	.then((res)=>{
+		return res.json()
+	})
+	.then(
+		(response)=>{
+			if(response.status==200){
+				get_recommedations_feed();
 			}
 		}
 	);

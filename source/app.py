@@ -451,6 +451,26 @@ def delete_event(id):
         #flash("You donot have access to this endpoint!","alert alert-danger")
         return {"status" : 404}
 
+@app.route('/show_interest_in_event/<id>')
+def show_interest_in_event(id):
+    if session['userId']:
+        Auth.show_interest_in_event(id, session['userId'])
+        #flash("User deactivated successfully!","alert alert-success")
+        return {"status" : 200}
+    else:
+        #flash("You donot have access to this endpoint!","alert alert-danger")
+        return {"status" : 404}
+
+@app.route('/remove_interest_in_event/<id>')
+def remove_interest_in_event(id):
+    if session['userId']:
+        Auth.remove_interest_in_event(id, session['userId'])
+        #flash("User deactivated successfully!","alert alert-success")
+        return {"status" : 200}
+    else:
+        #flash("You donot have access to this endpoint!","alert alert-danger")
+        return {"status" : 404}
+
 @app.route("/api/v1/set_context_phrases", methods = ["POST"])
 def set_context_phrases():
     if request.method == 'POST':

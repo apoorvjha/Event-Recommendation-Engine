@@ -11,6 +11,7 @@ class DBOps:
         self.interest_mapping_table_name = config["INTEREST_MAPPING_TABLE_NAME"]
         self.event_table_name = config["EVENT_TABLE_NAME"]
         self.event_recommendation_table_name = config["EVENT_RECOMMENDATION_TABLE_NAME"]
+        self.event_interest_table_name = config["EVENT_INTEREST_TABLE_NAME"]
         cur = self.con.cursor()
         cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.table_name}(
             "username" TEXT,
@@ -38,6 +39,11 @@ class DBOps:
         )""")
         self.con.commit()
         cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.event_recommendation_table_name}(
+            "eventID" TEXT,
+            "userID" INTEGER
+        )""")
+        self.con.commit()
+        cur.execute(f"""CREATE TABLE IF NOT EXISTS {self.event_interest_table_name}(
             "eventID" TEXT,
             "userID" INTEGER
         )""")
@@ -286,6 +292,10 @@ def get_events(userID = None):
                 a.eventDate,
                 a.eventAddress,
                 a.eventPic,
+                CASE
+                    WHEN c.userID IS NULL THEN 'FALSE'
+                    ELSE 'TRUE'
+                END AS event_interest_flag,
                 GROUP_CONCAT(a.WordIndex) as WordIndex 
             FROM 
                 {config['EVENT_TABLE_NAME']} a
@@ -293,9 +303,14 @@ def get_events(userID = None):
                 {config['EVENT_RECOMMENDATION_TABLE_NAME']} b
             ON
                 a.eventID = b.eventID
+            LEFT JOIN
+                {config['EVENT_INTEREST_TABLE_NAME']} c
+            ON
+                b.eventID = c.eventID AND
+                b.userID = c.userID
             WHERE
                 b.userID = ?
-            GROUP BY 1,2,3,4,5,6 
+            GROUP BY 1,2,3,4,5,6,7 
         """
         val = (userID,)
     data=db.executeQuery(query, val = val)
@@ -306,14 +321,17 @@ def get_events(userID = None):
     event_address = []
     event_id = []
     event_pic = []
+    event_interest_flag = []
     for row in data:
         event_id.append(row[0])
         event_name.append(row[1])
         event_pic.append(row[5])
-        words.append(row[6].split(','))
+        words.append(row[7].split(','))
         event_description.append(row[2])
         event_date.append(row[3])
         event_address.append(row[4])
+        if userID is not None:
+            event_interest_flag.append(row[6])
     db.destruct()
     return {
         "event_id" : event_id,
@@ -322,7 +340,8 @@ def get_events(userID = None):
         "event_description" : event_description,
         "event_date" : event_date,
         "event_address" : event_address,
-        "event_pic" : event_pic
+        "event_pic" : event_pic,
+        "event_interest_flag" : event_interest_flag
     }
 
 def get_event_id(WordIndex):
@@ -358,4 +377,22 @@ def delete_events(event_id):
     val = (event_id, )
     db.executeQuery(query, val, return_mode = False)
     db.destruct()
+
+def show_interest_in_event(event_id, user_id):
+    config = read_config()
+    db=DBOps(config)
+    query="INSERT INTO "+config['EVENT_INTEREST_TABLE_NAME']+"(eventID, userID) VALUES (?, ?)"
+    val = (event_id, user_id)
+    db.executeQuery(query, val, return_mode = False)
+    db.destruct()
+    return
+
+def remove_interest_in_event(event_id, user_id):
+    config = read_config()
+    db=DBOps(config)
+    query="DELETE FROM "+config['EVENT_INTEREST_TABLE_NAME']+" WHERE eventID = ? AND userID = ?"
+    val = (event_id, user_id)
+    db.executeQuery(query, val, return_mode = False)
+    db.destruct()
+    return
 

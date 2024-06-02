@@ -326,23 +326,36 @@ def get_events(userID = None):
         event_id.append(row[0])
         event_name.append(row[1])
         event_pic.append(row[5])
-        words.append(row[7].split(','))
         event_description.append(row[2])
         event_date.append(row[3])
         event_address.append(row[4])
         if userID is not None:
             event_interest_flag.append(row[6])
+            words.append(row[7].split(','))
+        else:
+            words.append(row[6].split(','))
     db.destruct()
-    return {
-        "event_id" : event_id,
-        "event_tags" : words,
-        "event_name" : event_name,
-        "event_description" : event_description,
-        "event_date" : event_date,
-        "event_address" : event_address,
-        "event_pic" : event_pic,
-        "event_interest_flag" : event_interest_flag
-    }
+    if userID is None:
+        return {
+            "event_id" : event_id,
+            "event_tags" : words,
+            "event_name" : event_name,
+            "event_description" : event_description,
+            "event_date" : event_date,
+            "event_address" : event_address,
+            "event_pic" : event_pic
+        }
+    else:
+        return {
+            "event_id" : event_id,
+            "event_tags" : words,
+            "event_name" : event_name,
+            "event_description" : event_description,
+            "event_date" : event_date,
+            "event_address" : event_address,
+            "event_pic" : event_pic,
+            "event_interest_flag" : event_interest_flag
+        }
 
 def get_event_id(WordIndex):
     config = read_config()
